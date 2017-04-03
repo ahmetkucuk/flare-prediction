@@ -1,5 +1,6 @@
 
 import numpy as np
+from sklearn.decomposition import PCA
 
 
 def _norm_min_max(data):
@@ -8,13 +9,23 @@ def _norm_min_max(data):
 
 
 def _norm_z_score(data):
-	data = (data - np.mean(data)) / np.std(data)
+	data = (data - np.mean(data)) / np.std(data, axis=0)
 	return data
 
 
 def _norm_zero_center(data):
-	data = (data - np.mean(data))
+	data = (data - np.mean(data, axis=0))
 	return data
+
+
+def _svd_whiten(X):
+	X -= np.mean(X, axis=0) # zero-center the data (important)
+	cov = np.dot(X.T, X) / X.shape[0]
+	cov = np.nan_to_num(cov)
+	U,S,V = np.linalg.svd(cov)
+	Xrot = np.dot(X, U)
+	Xwhite = Xrot / np.sqrt(S + 1e-5)
+	return Xwhite
 
 
 def norm_min_max(data):
@@ -33,6 +44,15 @@ def norm_zero_center(data):
 	data = np.nan_to_num(data)
 	data = np.apply_along_axis(_norm_zero_center, 1, data)
 	return data
+
+
+def norm_pca_whiten(data):
+	data = np.nan_to_num(data)
+	_data = np.zeros_like(data)
+	for i in xrange(data.shape[0]):
+		_data[i,:] = _svd_whiten(data[i,:])
+	#data = np.apply_over_axes(_svd_whiten, data, [1, 2])
+	return _data
 
 
 def get_configs(type, norm_type, expriment_name):
@@ -54,6 +74,8 @@ def get_configs(type, norm_type, expriment_name):
 		norm_func = norm_z_score
 	elif norm_type == 'zero_center':
 		norm_func = norm_zero_center
+	elif norm_type == 'pca_whiten':
+		norm_func = norm_pca_whiten
 	else:
 		norm_func = norm_min_max
 
