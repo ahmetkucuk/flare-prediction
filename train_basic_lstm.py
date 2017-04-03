@@ -4,7 +4,7 @@ import tensorflow as tf
 
 class TrainLSTM(object):
 
-	def __init__(self, model, dataset, model_dir, learning_rate=0.0001, training_iters=100000, batch_size=9, display_step=10):
+	def __init__(self, model, dataset, model_dir, learning_rate=0.0001, training_iters=10000, batch_size=9, display_step=10):
 
 		self.dataset = dataset
 		self.model_dir = model_dir
@@ -15,7 +15,6 @@ class TrainLSTM(object):
 
 		self.x, self.y = model.get_placeholders()
 		self.preds = model.get_preds()
-
 
 		with tf.name_scope("evaluations"):
 			# Define loss and optimizer
@@ -32,36 +31,36 @@ class TrainLSTM(object):
 
 	def train(self):
 		init = tf.global_variables_initializer()
-		with tf.Session() as sess:
+		sess = tf.Session()
+		#with tf.Session() as sess:
 
-			merged = tf.summary.merge_all()
-			train_writer = tf.summary.FileWriter(self.model_dir + '/train', sess.graph)
-			sess.run(init)
-			step = 1
-			# Keep training until reach max iterations
-			while step * self.batch_size < self.training_iters:
-				batch_x, batch_y = self.dataset.next_batch(self.batch_size)
+		merged = tf.summary.merge_all()
+		train_writer = tf.summary.FileWriter(self.model_dir + '/train', sess.graph)
+		sess.run(init)
+		step = 1
+		# Keep training until reach max iterations
+		while step * self.batch_size < self.training_iters:
+			batch_x, batch_y = self.dataset.next_batch(self.batch_size)
 
-				sess.run(self.optimizer, feed_dict={self.x: batch_x, self.y: batch_y})
-				if step % self.display_step == 0:
+			sess.run(self.optimizer, feed_dict={self.x: batch_x, self.y: batch_y})
+			if step % self.display_step == 0:
 
-					summary, acc = sess.run([merged, self.accuracy], feed_dict={self.x: batch_x, self.y: batch_y})
-					train_writer.add_summary(summary=summary, global_step=step)
+				summary, acc = sess.run([merged, self.accuracy], feed_dict={self.x: batch_x, self.y: batch_y})
+				train_writer.add_summary(summary=summary, global_step=step)
 
-					summary, loss = sess.run([merged, self.cost], feed_dict={self.x: batch_x, self.y: batch_y})
-					train_writer.add_summary(summary=summary, global_step=step)
+				summary, loss = sess.run([merged, self.cost], feed_dict={self.x: batch_x, self.y: batch_y})
+				train_writer.add_summary(summary=summary, global_step=step)
 
-					print("Iter " + str(step*self.batch_size) + ", Minibatch Loss= " + \
-						  "{:.6f}".format(loss) + ", Training Accuracy= " + \
-						  "{:.5f}".format(acc))
-				step += 1
-			print("Optimization Finished!")
+				print("Iter " + str(step*self.batch_size) + ", Minibatch Loss= " + \
+					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
+					  "{:.5f}".format(acc))
+			step += 1
+		print("Optimization Finished!")
 
-			avg_acc = 0
-			for i in range(2):
-				test_data, test_label = self.dataset.next_batch(i)
-				avg_acc += sess.run(self.accuracy, feed_dict={self.x: test_data, self.y: test_label})
-				avg_acc /= 2
-			print("Testing Accuracy:", avg_acc)
-
+		avg_acc = 0
+		for i in range(2):
+			test_data, test_label = self.dataset.next_batch(i)
+			avg_acc += sess.run(self.accuracy, feed_dict={self.x: test_data, self.y: test_label})
+			avg_acc /= 2
+		sess.close()
 

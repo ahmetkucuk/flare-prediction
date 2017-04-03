@@ -2,33 +2,21 @@
 from flare_dataset import get_prior12_span12
 from basic_lstm import BasicLSTMModel
 from train_basic_lstm import TrainLSTM
-import sys
+from configurations import get_configs
 
-
-def get_configs(type):
-
-	data_root, model_dir = "", ""
-	if type == "local":
-		data_root = "/Users/ahmetkucuk/Documents/Research/Flare_Prediction/ARData"
-		model_dir = "/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/BasicLSTM"
-	elif type == "server":
-		data_root = "/home/ahmet/workspace/tensorflow/flare_prediction/ARData"
-		model_dir = "/home/ahmet/workspace/tensorflow/tensorboard/flare_prediction/basic_lstm"
-	else:
-		print("invalid config type")
-		exit()
-	return data_root, model_dir
+import tensorflow as tf
 
 
 def run(args):
 
-	if len(args) < 1:
-		print("Provide args: args[0] = local/server")
+	if len(args) < 3:
+		print("Provide args: args[0] = local/server, args[1] = min_max/z_score/zero_center, args[2] = experiment_name")
 		exit()
 
-	data_root, model_dir = get_configs(args[0])
+	data_root, model_dir, norm_func = get_configs(args[0], args[1], args[2])
 
-	dataset = get_prior12_span12(data_root=data_root)
+	dataset = get_prior12_span12(data_root=data_root, norm_func=norm_func)
+
 	lstm = BasicLSTMModel()
 	train_lstm = TrainLSTM(lstm, dataset, model_dir=model_dir)
 	train_lstm.train()

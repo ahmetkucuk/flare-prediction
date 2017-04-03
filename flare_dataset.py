@@ -62,26 +62,12 @@ def read_data(data_root):
 	return dataset_by_identifier
 
 
-def get_prior12_span12(data_root):
+def get_prior12_span12(data_root, norm_func):
 
 	dataset_by_identifier = read_data(data_root=data_root)
 
 	prior12_span12 = dataset_by_identifier["12_12"]
 	prior12_span12_labels = dataset_by_identifier["12_12_labels"]
-	x, y = get_norm(np.array(prior12_span12).astype("float32")), np.array(prior12_span12_labels).astype("int8")
+	x, y = norm_func(np.array(prior12_span12).astype("float32")), np.array(prior12_span12_labels).astype("int8")
 	return DatasetIterator(x, y)
-
-
-def print_ex(data):
-	data = np.nan_to_num((data - np.min(data)) / (np.max(data) - np.min(data)))
-
-	return data
-
-
-def get_norm(data):
-	data = data.transpose()
-	#print(data.dtype)
-	data = np.apply_along_axis(print_ex, 1, data)
-	data = data.transpose()
-	return data
 
