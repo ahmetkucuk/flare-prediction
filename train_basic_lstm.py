@@ -4,7 +4,7 @@ import tensorflow as tf
 
 class TrainLSTM(object):
 
-	def __init__(self, model, dataset, model_dir, learning_rate=0.0001, training_iters=10000, batch_size=9, display_step=10):
+	def __init__(self, model, dataset, model_dir, learning_rate=0.0001, training_iters=300000, batch_size=9, display_step=100):
 
 		self.dataset = dataset
 		self.model_dir = model_dir
@@ -36,6 +36,7 @@ class TrainLSTM(object):
 
 		merged = tf.summary.merge_all()
 		train_writer = tf.summary.FileWriter(self.model_dir + '/train', sess.graph)
+		test_writer = tf.summary.FileWriter(self.model_dir + '/test', sess.graph)
 		sess.run(init)
 		step = 1
 		# Keep training until reach max iterations
@@ -54,13 +55,11 @@ class TrainLSTM(object):
 				print("Iter " + str(step*self.batch_size) + ", Minibatch Loss= " + \
 					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
 					  "{:.5f}".format(acc))
+
+				test_data, test_label = self.dataset.get_test()
+				summary, accuracy = sess.run([merged, self.accuracy], feed_dict={self.x: test_data, self.y: test_label})
+				test_writer.add_summary(summary=summary, global_step=step)
+				print("Test Accuracy: {:.6f}".format(accuracy))
 			step += 1
 		print("Optimization Finished!")
-
-		avg_acc = 0
-		for i in range(2):
-			test_data, test_label = self.dataset.next_batch(i)
-			avg_acc += sess.run(self.accuracy, feed_dict={self.x: test_data, self.y: test_label})
-			avg_acc /= 2
-		sess.close()
 

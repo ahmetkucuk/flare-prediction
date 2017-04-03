@@ -59,10 +59,10 @@ def get_configs(type, norm_type, expriment_name):
 
 	data_root, model_dir = "", ""
 	if type == "local":
-		data_root = "/Users/ahmetkucuk/Documents/Research/Flare_Prediction/ARData"
+		data_root = "/Users/ahmetkucuk/Documents/Research/Flare_Prediction/ARDataLarge"
 		model_dir = "/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/FlarePrediction/" + expriment_name
 	elif type == "server":
-		data_root = "/home/ahmet/workspace/tensorflow/flare_prediction/ARData"
+		data_root = "/home/ahmet/workspace/tensorflow/flare_prediction/ARDataLarge"
 		model_dir = "/home/ahmet/workspace/tensorflow/tensorboard/flare_prediction/" + expriment_name
 	else:
 		print("invalid config type")

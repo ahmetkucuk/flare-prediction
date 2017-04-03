@@ -68,6 +68,17 @@ def get_prior12_span12(data_root, norm_func):
 
 	prior12_span12 = dataset_by_identifier["12_12"]
 	prior12_span12_labels = dataset_by_identifier["12_12_labels"]
-	x, y = norm_func(np.array(prior12_span12).astype("float32")), np.array(prior12_span12_labels).astype("int8")
-	return DatasetIterator(x, y)
+
+	n_of_records = len(prior12_span12)
+	split_at = int(n_of_records*0.8)
+	training_data = prior12_span12[:split_at]
+	training_labels = prior12_span12_labels[:split_at]
+
+	testing_data = prior12_span12[split_at:]
+	testing_labels = prior12_span12_labels[split_at:]
+
+	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
+	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
+	iterator = DatasetIterator(x, y, test_x, test_y)
+	return iterator
 
