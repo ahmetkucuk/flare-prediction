@@ -2,6 +2,7 @@ import re
 import os
 import numpy as np
 from sklearn import preprocessing
+from sklearn.utils import shuffle
 from dataset_iterator import DatasetIterator
 
 
@@ -69,16 +70,31 @@ def get_prior12_span12(data_root, norm_func):
 	prior12_span12 = dataset_by_identifier["12_12"]
 	prior12_span12_labels = dataset_by_identifier["12_12_labels"]
 
-	n_of_records = len(prior12_span12)
-	split_at = int(n_of_records*0.8)
-	training_data = prior12_span12[:split_at]
-	training_labels = prior12_span12_labels[:split_at]
+	return generate_test_train(prior12_span12, prior12_span12_labels, norm_func)
 
-	testing_data = prior12_span12[split_at:]
-	testing_labels = prior12_span12_labels[split_at:]
+
+def get_prior12_span24(data_root, norm_func):
+
+	dataset_by_identifier = read_data(data_root=data_root)
+
+	prior12_span24 = dataset_by_identifier["12_24"]
+	prior12_span24_labels = dataset_by_identifier["12_24_labels"]
+
+	return generate_test_train(prior12_span24, prior12_span24_labels, norm_func)
+
+
+def generate_test_train(data, labels, norm_func):
+
+	n_of_records = len(data)
+	split_at = int(n_of_records*0.8)
+
+	data, labels = shuffle(data, labels)
+	training_data = data[:split_at]
+	training_labels = labels[:split_at]
+
+	testing_data = data[split_at:]
+	testing_labels = labels[split_at:]
 
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
-	iterator = DatasetIterator(x, y, test_x, test_y)
-	return iterator
-
+	return DatasetIterator(x, y, test_x, test_y)

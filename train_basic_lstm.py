@@ -2,9 +2,9 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-class TrainLSTM(object):
+class TrainRNN(object):
 
-	def __init__(self, model, dataset, model_dir, learning_rate=0.0001, training_iters=300000, batch_size=9, display_step=100):
+	def __init__(self, model, dataset, model_dir, learning_rate=0.001, training_iters=300000, batch_size=9, display_step=100):
 
 		self.dataset = dataset
 		self.model_dir = model_dir
@@ -13,7 +13,7 @@ class TrainLSTM(object):
 		self.batch_size = batch_size
 		self.display_step = display_step
 
-		self.x, self.y = model.get_placeholders()
+		self.x, self.y, self.dropout = model.get_placeholders()
 		self.preds = model.get_preds()
 
 		with tf.name_scope("evaluations"):
@@ -43,13 +43,13 @@ class TrainLSTM(object):
 		while step * self.batch_size < self.training_iters:
 			batch_x, batch_y = self.dataset.next_batch(self.batch_size)
 
-			sess.run(self.optimizer, feed_dict={self.x: batch_x, self.y: batch_y})
+			sess.run(self.optimizer, feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 0.5})
 			if step % self.display_step == 0:
 
-				summary, acc = sess.run([merged, self.accuracy], feed_dict={self.x: batch_x, self.y: batch_y})
+				summary, acc = sess.run([merged, self.accuracy], feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 1})
 				train_writer.add_summary(summary=summary, global_step=step)
 
-				summary, loss = sess.run([merged, self.cost], feed_dict={self.x: batch_x, self.y: batch_y})
+				summary, loss = sess.run([merged, self.cost], feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 1})
 				train_writer.add_summary(summary=summary, global_step=step)
 
 				print("Iter " + str(step*self.batch_size) + ", Minibatch Loss= " + \
@@ -57,7 +57,7 @@ class TrainLSTM(object):
 					  "{:.5f}".format(acc))
 
 				test_data, test_label = self.dataset.get_test()
-				summary, accuracy = sess.run([merged, self.accuracy], feed_dict={self.x: test_data, self.y: test_label})
+				summary, accuracy = sess.run([merged, self.accuracy], feed_dict={self.x: test_data, self.y: test_label, self.dropout: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
 				print("Test Accuracy: {:.6f}".format(accuracy))
 			step += 1

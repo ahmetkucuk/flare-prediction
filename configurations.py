@@ -31,18 +31,21 @@ def _svd_whiten(X):
 def norm_min_max(data):
 	data = np.nan_to_num(data)
 	data = np.apply_along_axis(_norm_min_max, 1, data)
+	data = np.nan_to_num(data)
 	return data
 
 
 def norm_z_score(data):
 	data = np.nan_to_num(data)
 	data = np.apply_along_axis(_norm_z_score, 1, data)
+	data = np.nan_to_num(data)
 	return data
 
 
 def norm_zero_center(data):
 	data = np.nan_to_num(data)
 	data = np.apply_along_axis(_norm_zero_center, 1, data)
+	data = np.nan_to_num(data)
 	return data
 
 
@@ -51,7 +54,7 @@ def norm_pca_whiten(data):
 	_data = np.zeros_like(data)
 	for i in xrange(data.shape[0]):
 		_data[i,:] = _svd_whiten(data[i,:])
-	#data = np.apply_over_axes(_svd_whiten, data, [1, 2])
+	_data = np.nan_to_num(_data)
 	return _data
 
 
@@ -77,6 +80,7 @@ def get_configs(type, norm_type, expriment_name):
 	elif norm_type == 'pca_whiten':
 		norm_func = norm_pca_whiten
 	else:
-		norm_func = norm_min_max
+		print("invalid config norm_func name")
+		exit()
 
 	return data_root, model_dir, norm_func
