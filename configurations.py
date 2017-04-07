@@ -58,18 +58,7 @@ def norm_pca_whiten(data):
 	return _data
 
 
-def get_configs(type, norm_type, expriment_name):
-
-	data_root, model_dir = "", ""
-	if type == "local":
-		data_root = "/Users/ahmetkucuk/Documents/Research/Flare_Prediction/ARDataLarge"
-		model_dir = "/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/FlarePrediction/" + expriment_name
-	elif type == "server":
-		data_root = "/home/ahmet/workspace/tensorflow/flare_prediction/ARDataLarge"
-		model_dir = "/home/ahmet/workspace/tensorflow/tensorboard/flare_prediction/" + expriment_name
-	else:
-		print("invalid config type")
-		exit()
+def get_norm_func(norm_type):
 
 	if norm_type == 'min_max':
 		norm_func = norm_min_max
@@ -83,4 +72,4 @@ def get_configs(type, norm_type, expriment_name):
 		print("invalid config norm_func name")
 		exit()
 
-	return data_root, model_dir, norm_func
+	return norm_func
