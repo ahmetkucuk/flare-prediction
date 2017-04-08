@@ -83,6 +83,33 @@ def get_prior12_span24(data_root, norm_func):
 	return generate_test_train(prior12_span24, prior12_span24_labels, norm_func)
 
 
+def apply_augmentation(data, labels):
+
+	new_data = []
+	new_labels = []
+
+	for (single_record, label) in zip(data, labels):
+
+		ts_length = len(single_record)
+
+		new_single_record = []
+		for i in range(ts_length / 2):
+			new_single_record.append(single_record[i])
+			new_single_record.append(single_record[i])
+
+		new_data.append(new_single_record)
+		new_labels.append(label)
+		new_single_record = []
+
+		for i in range(ts_length / 2, ts_length, 1):
+			new_single_record.append(single_record[i])
+			new_single_record.append(single_record[i])
+
+		new_data.append(new_single_record)
+		new_labels.append(label)
+	return new_data, new_labels
+
+
 def generate_test_train(data, labels, norm_func):
 
 	n_of_records = len(data)
@@ -91,6 +118,8 @@ def generate_test_train(data, labels, norm_func):
 	data, labels = shuffle(data, labels)
 	training_data = data[:split_at]
 	training_labels = labels[:split_at]
+
+	training_data, training_labels = apply_augmentation(training_data, training_labels)
 
 	testing_data = data[split_at:]
 	testing_labels = labels[split_at:]
