@@ -13,12 +13,12 @@ python ./../main.py \
   --norm_type=z_score \
   --n_input=14 \
   --dataset_dir=${DATASET_DIR} \
-  --n_hidden=12 \
+  --n_hidden=64 \
   --n_steps=120 \
   --n_classes=2 \
   --learning_rate=0.0001 \
-  --n_cells=1 \
-  --dropout=0.7 \
+  --n_cells=2 \
+  --dropout=0.5 \
   --batch_size=20 \
   --is_lstm=False \
   --display_step=100 \
