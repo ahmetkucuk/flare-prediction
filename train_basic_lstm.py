@@ -61,6 +61,10 @@ class TrainRNN(object):
 				summary, accuracy = sess.run([merged, self.accuracy], feed_dict={self.x: test_data, self.y: test_label, self.dropout: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
 				print("Test Accuracy: {:.6f}".format(accuracy))
+				train_writer.flush()
+				test_writer.flush()
 			step += 1
+		train_writer.close()
+		test_writer.close()
 		print("Optimization Finished!")
 

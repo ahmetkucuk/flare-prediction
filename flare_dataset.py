@@ -85,6 +85,24 @@ def get_prior12_span24(data_root, norm_func):
 
 def apply_augmentation(data, labels):
 
+	print(len(data))
+	stretched_data, stretched_labels = stretch_augmentation(data, labels)
+	squeezed_data, squeezed_labels = squeeze_augmentation(data, labels)
+
+	data = data + stretched_data
+	labels = labels + stretched_labels
+	print(len(data))
+
+	data = data + squeezed_data
+	labels = labels + squeezed_labels
+
+	print(len(data))
+
+	return data, labels
+
+
+def stretch_augmentation(data, labels):
+
 	new_data = []
 	new_labels = []
 
@@ -103,6 +121,27 @@ def apply_augmentation(data, labels):
 
 		for i in range(ts_length / 2, ts_length, 1):
 			new_single_record.append(single_record[i])
+			new_single_record.append(single_record[i])
+
+		new_data.append(new_single_record)
+		new_labels.append(label)
+	return new_data, new_labels
+
+
+def squeeze_augmentation(data, labels):
+
+	new_data = []
+	new_labels = []
+
+	for (single_record, label) in zip(data, labels):
+
+		ts_length = len(single_record)
+		new_single_record = []
+
+		for i in range(0, ts_length, 2):
+			new_single_record.append(single_record[i])
+
+		for i in range(1, ts_length, 2):
 			new_single_record.append(single_record[i])
 
 		new_data.append(new_single_record)
