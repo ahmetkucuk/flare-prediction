@@ -17,8 +17,9 @@ python ./../main.py \
   --n_steps=120 \
   --n_classes=2 \
   --learning_rate=0.0001 \
-  --n_cells=2 \
+  --n_cells=1 \
   --dropout=0.5 \
   --batch_size=20 \
   --is_lstm=False \
+  --should_augment=False \
   --display_step=100 \
