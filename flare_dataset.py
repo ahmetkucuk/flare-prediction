@@ -73,7 +73,16 @@ def get_prior12_span12(data_root, norm_func):
 	return generate_test_train(prior12_span12, prior12_span12_labels, norm_func)
 
 
-def get_prior12_span24(data_root, norm_func):
+def get_raw_prior12_span24(data_root):
+
+	dataset_by_identifier = read_data(data_root=data_root)
+
+	prior12_span24 = dataset_by_identifier["12_24"]
+	prior12_span24_labels = dataset_by_identifier["12_24_labels"]
+	return prior12_span24, prior12_span24_labels
+
+
+def get_prior12_span24(data_root, norm_func, should_augment):
 
 	dataset_by_identifier = read_data(data_root=data_root)
 
@@ -82,21 +91,26 @@ def get_prior12_span24(data_root, norm_func):
 
 	return generate_test_train(prior12_span24, prior12_span24_labels, norm_func)
 
+def get_data(data_root, name, norm_func, should_augment):
+
+	dataset_by_identifier = read_data(data_root=data_root)
+
+	data = dataset_by_identifier[name]
+	labels = dataset_by_identifier[name + "_labels"]
+
+	return generate_test_train(data, labels, norm_func, should_augment)
+
 
 def apply_augmentation(data, labels):
 
-	print(len(data))
 	stretched_data, stretched_labels = stretch_augmentation(data, labels)
 	squeezed_data, squeezed_labels = squeeze_augmentation(data, labels)
 
 	data = data + stretched_data
 	labels = labels + stretched_labels
-	print(len(data))
 
 	data = data + squeezed_data
 	labels = labels + squeezed_labels
-
-	print(len(data))
 
 	return data, labels
 
@@ -149,7 +163,7 @@ def squeeze_augmentation(data, labels):
 	return new_data, new_labels
 
 
-def generate_test_train(data, labels, norm_func):
+def generate_test_train(data, labels, norm_func, should_augment):
 
 	n_of_records = len(data)
 	split_at = int(n_of_records*0.8)
@@ -158,7 +172,8 @@ def generate_test_train(data, labels, norm_func):
 	training_data = data[:split_at]
 	training_labels = labels[:split_at]
 
-	training_data, training_labels = apply_augmentation(training_data, training_labels)
+	if should_augment:
+		training_data, training_labels = apply_augmentation(training_data, training_labels)
 
 	testing_data = data[split_at:]
 	testing_labels = labels[split_at:]

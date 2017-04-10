@@ -1,7 +1,7 @@
 import sys
 import tensorflow as tf
 from flare_dataset import get_prior12_span12
-from flare_dataset import get_prior12_span24
+from flare_dataset import get_data
 from basic_rnn import BasicRNNModel
 from train_basic_lstm import TrainRNN
 from configurations import get_norm_func
@@ -44,7 +44,7 @@ tf.app.flags.DEFINE_float('dropout', 0.7,
 tf.app.flags.DEFINE_integer('batch_size', 20,
 							"""Batch Size.""")
 
-tf.app.flags.DEFINE_integer('training_iters', 300000,
+tf.app.flags.DEFINE_integer('training_iters', 20000,
 							"""Number of iterations.""")
 
 tf.app.flags.DEFINE_integer('n_cells', 1,
@@ -53,8 +53,13 @@ tf.app.flags.DEFINE_integer('n_cells', 1,
 tf.app.flags.DEFINE_boolean('is_lstm', False,
 							"""Pick if lstm or gru cell.""")
 
+tf.app.flags.DEFINE_boolean('should_augment', True,
+							"""Pick if should augment training data.""")
 
-tf.app.flags.DEFINE_integer('display_step', 100,
+tf.app.flags.DEFINE_string('dataset_name', "12_24",
+							"""Pick if should augment training data.""")
+
+tf.app.flags.DEFINE_integer('display_step', 1000,
 							"""Print results after x steps.""")
 
 
@@ -62,7 +67,7 @@ def main(argv=None):
 
 	norm_func = get_norm_func(FLAGS.norm_type)
 
-	dataset = get_prior12_span24(data_root=FLAGS.dataset_dir, norm_func=norm_func)
+	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, should_augment=FLAGS.should_augment)
 
 	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=FLAGS.n_steps, n_hidden=FLAGS.n_hidden,
 						 n_classes=FLAGS.n_classes, n_cells=FLAGS.n_cells, is_lstm=FLAGS.is_lstm)

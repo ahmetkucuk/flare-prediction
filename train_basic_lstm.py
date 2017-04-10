@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+
 class TrainRNN(object):
 
 	def __init__(self, model, dataset, model_dir, learning_rate=0.001, training_iters=300000, batch_size=9, display_step=100, dropout_val=0.7):
@@ -41,7 +42,7 @@ class TrainRNN(object):
 		sess.run(init)
 		step = 1
 		# Keep training until reach max iterations
-		while step * self.batch_size < self.training_iters:
+		while step < self.training_iters:
 			batch_x, batch_y = self.dataset.next_batch(self.batch_size)
 
 			sess.run(self.optimizer, feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: self.dropout_val})
@@ -53,7 +54,7 @@ class TrainRNN(object):
 				summary, loss = sess.run([merged, self.cost], feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 1})
 				train_writer.add_summary(summary=summary, global_step=step)
 
-				print("Iter " + str(step*self.batch_size) + ", Minibatch Loss= " + \
+				print("Iter " + str(step) + ", Minibatch Loss= " + \
 					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
 					  "{:.5f}".format(acc))
 
