@@ -91,6 +91,7 @@ def get_prior12_span24(data_root, norm_func, should_augment):
 
 	return generate_test_train(prior12_span24, prior12_span24_labels, norm_func)
 
+
 def get_data(data_root, name, norm_func, should_augment):
 
 	dataset_by_identifier = read_data(data_root=data_root)
@@ -115,6 +116,18 @@ def apply_augmentation(data, labels):
 	return data, labels
 
 
+def double_array(data):
+	if len(data) == 0:
+		return data
+	new_data = []
+	prev = data[0]
+	for i in range(len(data)):
+		new_data.append((data[i] + prev) / 2.0)
+		new_data.append(data[i])
+		prev = data[i]
+	return new_data
+
+
 def stretch_augmentation(data, labels):
 
 	new_data = []
@@ -122,20 +135,19 @@ def stretch_augmentation(data, labels):
 
 	for (single_record, label) in zip(data, labels):
 
-		ts_length = len(single_record)
+		double_record = double_array(single_record)
+		ts_length = len(double_record)
 
 		new_single_record = []
 		for i in range(ts_length / 2):
-			new_single_record.append(single_record[i])
-			new_single_record.append(single_record[i])
+			new_single_record.append(double_record[i])
 
 		new_data.append(new_single_record)
 		new_labels.append(label)
 		new_single_record = []
 
 		for i in range(ts_length / 2, ts_length, 1):
-			new_single_record.append(single_record[i])
-			new_single_record.append(single_record[i])
+			new_single_record.append(double_record[i])
 
 		new_data.append(new_single_record)
 		new_labels.append(label)
@@ -181,3 +193,5 @@ def generate_test_train(data, labels, norm_func, should_augment):
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
 	return DatasetIterator(x, y, test_x, test_y)
+
+print(double_array([1, 2, 3, 4, 5]))
