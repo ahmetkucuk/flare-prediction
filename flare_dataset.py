@@ -120,12 +120,12 @@ def double_array(data):
 	if len(data) == 0:
 		return data
 	new_data = []
-	prev = np.array(data[0])
+	prev = np.array(data[0], dtype=float)
 	for i in range(len(data)):
-		d_array = np.array(data[i])
+		d_array = np.array(data[i], dtype=float)
 		new_data.append(((d_array + prev) / 2.0).tolist())
 		new_data.append(data[i])
-		prev = np.array(data[i])
+		prev = np.array(data[i], dtype=float)
 	return new_data
 
 
