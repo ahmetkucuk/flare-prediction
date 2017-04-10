@@ -70,7 +70,7 @@ def main(argv=None):
 	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, should_augment=FLAGS.should_augment)
 
 	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=FLAGS.n_steps, n_hidden=FLAGS.n_hidden,
-						 n_classes=FLAGS.n_classes, n_cells=FLAGS.n_cells, is_lstm=FLAGS.is_lstm)
+						n_classes=FLAGS.n_classes, n_cells=FLAGS.n_cells, is_lstm=FLAGS.is_lstm)
 
 	train_lstm = TrainRNN(lstm, dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
 						training_iters=FLAGS.training_iters, batch_size=FLAGS.batch_size,

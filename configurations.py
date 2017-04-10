@@ -53,7 +53,7 @@ def norm_pca_whiten(data):
 	data = np.nan_to_num(data)
 	_data = np.zeros_like(data)
 	for i in xrange(data.shape[0]):
-		_data[i,:] = _svd_whiten(data[i,:])
+		_data[i, :] = _svd_whiten(data[i,:])
 	_data = np.nan_to_num(_data)
 	return _data
 
