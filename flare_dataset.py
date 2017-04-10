@@ -120,11 +120,12 @@ def double_array(data):
 	if len(data) == 0:
 		return data
 	new_data = []
-	prev = data[0]
+	prev = np.array(data[0])
 	for i in range(len(data)):
-		new_data.append((data[i] + prev) / 2.0)
+		d_array = np.array(data[i])
+		new_data.append(((d_array + prev) / 2.0).tolist())
 		new_data.append(data[i])
-		prev = data[i]
+		prev = np.array(data[i])
 	return new_data
 
 
@@ -193,5 +194,3 @@ def generate_test_train(data, labels, norm_func, should_augment):
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
 	return DatasetIterator(x, y, test_x, test_y)
-
-print(double_array([1, 2, 3, 4, 5]))
