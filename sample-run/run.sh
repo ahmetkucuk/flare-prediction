@@ -2,7 +2,7 @@
 
 # Where the checkpoint and logs will be saved to.
 #TRAIN_DIR=/tmp/lenet-model
-TRAIN_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/FlarePrediction
+TRAIN_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/FlarePrediction/embedding
 
 # Where the dataset is saved to.
 #DATASET_DIR=/home/ahmet/Documents/Research/Time_Series/ARDataLarge
@@ -14,12 +14,14 @@ python ./../main.py \
   --n_input=14 \
   --dataset_dir=${DATASET_DIR} \
   --n_hidden=64 \
-  --n_steps=120 \
+  --n_steps=60 \
   --n_classes=2 \
-  --learning_rate=0.0001 \
+  --learning_rate=0.001 \
+  --training_iters=200 \
   --n_cells=1 \
   --dropout=0.5 \
   --batch_size=20 \
   --is_lstm=False \
   --should_augment=False \
+  --dataset_name=12_12 \
   --display_step=100 \
