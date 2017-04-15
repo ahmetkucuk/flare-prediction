@@ -2,7 +2,7 @@
 
 # Where the checkpoint and logs will be saved to.
 #TRAIN_DIR=/tmp/lenet-model
-TRAIN_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/FlarePrediction/embedding
+TRAIN_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/FlarePrediction/embedding2
 
 # Where the dataset is saved to.
 #DATASET_DIR=/home/ahmet/Documents/Research/Time_Series/ARDataLarge

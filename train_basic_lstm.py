@@ -35,7 +35,7 @@ class TrainRNN(object):
 				self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 				tf.summary.scalar('accuracy', self.accuracy)
 
-	def create_embeddings(self, sess):
+	def create_embeddings(self, sess, summary_writer):
 		EMB = np.zeros([100, 64], dtype='float32')
 
 		metadata_file = open(self.model_dir + '/train/metadata.tsv', 'w')
@@ -50,14 +50,13 @@ class TrainRNN(object):
 		metadata_file.close()
 
 		embedding_var = tf.Variable(EMB,  name='Embedding_of_output')
-		summar_writer = tf.summary.FileWriter(self.model_dir + '/train')
 		sess.run(embedding_var.initializer)
 		config = projector.ProjectorConfig()
 		embedding = config.embeddings.add()
 		embedding.tensor_name = embedding_var.name
-		embedding.metadata_path = self.model_dir + '/train'
+		embedding.metadata_path = self.model_dir + '/train/metadata.tsv'
 
-		projector.visualize_embeddings(summar_writer, config)
+		projector.visualize_embeddings(summary_writer, config)
 		saver = tf.train.Saver([embedding_var])
 		saver.save(sess, self.model_dir + '/train/model.ckpt', 1)
 
@@ -97,7 +96,7 @@ class TrainRNN(object):
 			step += 1
 		train_writer.close()
 		test_writer.close()
-		self.create_embeddings(sess)
+		self.create_embeddings(sess, train_writer)
 		sess.close()
 
 		print("Optimization Finished!")
