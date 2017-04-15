@@ -4,6 +4,7 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.utils import shuffle
 from dataset_iterator import DatasetIterator
+from dataset_iterator import MultiDatasetIterator
 
 
 def get_files(data_root):
@@ -25,11 +26,12 @@ def get_two_char_after(filename, word):
 def find_labels(filename):
 
 	label = [1, 0]
+	timestamp = filename[:filename.index("Prior")]
 	prior = get_two_char_after(filename, "Prior")
 	span = get_two_char_after(filename, "Span")
 	if "noflare" in filename:
 		label = [0, 1]
-	return label, prior, span
+	return timestamp, label, prior, span
 
 
 def read_data(data_root):
@@ -39,14 +41,16 @@ def read_data(data_root):
 
 	for filename in data_path_by_name.keys():
 
-		label, prior, span = find_labels(filename)
+		timestamp, label, prior, span = find_labels(filename)
 		dataset_values = str(prior) + "_" + str(span)
 		dataset_labels = str(prior) + "_" + str(span) + "_labels"
+		dataset_id = str(prior) + "_" + str(span) + "_ids"
 		# print(dataset_values)
 
 		if not dataset_values in dataset_by_identifier:
 			dataset_by_identifier[dataset_values] = []
 			dataset_by_identifier[dataset_labels] = []
+			dataset_by_identifier[dataset_id] = []
 
 		with open(data_path_by_name[filename], "r") as f:
 			skip_first = True
@@ -59,6 +63,7 @@ def read_data(data_root):
 				ts_features_in_file.append(features[1:])
 			dataset_by_identifier[dataset_values].append(ts_features_in_file)
 			dataset_by_identifier[dataset_labels].append(label)
+			dataset_by_identifier[dataset_id].append(timestamp)
 
 	return dataset_by_identifier
 
@@ -102,16 +107,53 @@ def get_data(data_root, name, norm_func, should_augment):
 	return generate_test_train(data, labels, norm_func, should_augment)
 
 
+def extract_data_and_sort(dataset_by_identifier, dataname):
+
+	data = dataset_by_identifier[dataname]
+	labels = dataset_by_identifier[dataname + "_labels"]
+	ids = dataset_by_identifier[dataname + "_ids"]
+
+	ids, labels, data = zip(*sorted(zip(ids, labels, data)))
+	return ids, labels, data
+
+
+def get_multi_data(data_root, norm_func, should_augment):
+
+	dataset_by_identifier = read_data(data_root=data_root)
+
+	dataname1 = "12_24"
+	dataname2 = "24_24"
+	ids1, labels1, data1 = extract_data_and_sort(dataset_by_identifier, dataname1)
+	ids2, labels2, data2 = extract_data_and_sort(dataset_by_identifier, dataname2)
+
+	new_labels1, new_data1 = [], []
+	new_labels2, new_data2 = [], []
+	common_records = set(ids1).intersection(set(ids2))
+	for id, l, d in zip(ids1, labels1, data1):
+		if id in common_records:
+			new_labels1.append(l)
+			new_data1.append(d)
+
+	for id, l, d in zip(ids2, labels2, data2):
+		if id in common_records:
+			new_labels2.append(l)
+			new_data2.append(d)
+
+	dataset1 = generate_test_train(new_data1, new_labels1, norm_func, should_augment)
+	dataset2 = generate_test_train(new_data2, new_labels2, norm_func, should_augment)
+	return MultiDatasetIterator(dataset1=dataset1, dataset2=dataset2)
+
+
 def apply_augmentation(data, labels):
 
 	stretched_data, stretched_labels = stretch_augmentation(data, labels)
-	squeezed_data, squeezed_labels = squeeze_augmentation(data, labels)
+	#squeezed_data, squeezed_labels = squeeze_augmentation(data, labels)
 
 	data = data + stretched_data
 	labels = labels + stretched_labels
 
-	data = data + squeezed_data
-	labels = labels + squeezed_labels
+	#data = data + squeezed_data
+	#labels = labels + squeezed_labels
 
 	return data, labels
 
