@@ -3,7 +3,7 @@ import numpy as np
 
 class DatasetIterator(object):
 
-	def __init__(self, data, labels, test_data, test_labels):
+	def __init__(self, data, labels, test_data=None, test_labels=None):
 		self.data = data
 		self.labels = labels
 		self.batch_index = 0
@@ -28,6 +28,9 @@ class DatasetIterator(object):
 
 	def get_test(self):
 		return self.test_data, self.test_labels
+
+	def get_test_as_datasetiterator(self):
+		return DatasetIterator(data=self.test_data, labels=self.test_labels)
 
 
 class MultiDatasetIterator(object):

@@ -9,6 +9,7 @@ class BasicRNNModel(object):
 		# tf Graph input
 		self.x = tf.placeholder(tf.float32, [None, n_steps, n_input])
 		self.dropout = tf.placeholder(tf.float32)
+		self.n_hidden = n_hidden
 
 		# Define weights
 		self.weights = {
@@ -56,3 +57,6 @@ class BasicRNNModel(object):
 
 	def get_placeholders(self):
 		return self.x, self.dropout
+
+	def get_n_hidden(self):
+		return self.n_hidden

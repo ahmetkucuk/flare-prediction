@@ -16,6 +16,7 @@ class TrainRNN(object):
 		self.batch_size = batch_size
 		self.display_step = display_step
 		self.dropout_val = dropout_val
+		self.model = model
 
 		self.x, self.dropout = model.get_placeholders()
 		self.y = tf.placeholder(tf.float32, [None, 2])
@@ -36,11 +37,13 @@ class TrainRNN(object):
 				tf.summary.scalar('accuracy', self.accuracy)
 
 	def create_embeddings(self, sess, summary_writer):
-		EMB = np.zeros([100, 64], dtype='float32')
+		testing_dataset = self.dataset.get_test_as_datasetiterator()
+		n_of_elements = testing_dataset.size()
+		EMB = np.zeros([n_of_elements, self.model.get_n_hidden()], dtype='float32')
 
 		metadata_file = open(self.model_dir + '/train/metadata.tsv', 'w')
-		for i in range(100):
-			batch_x, batch_y = self.dataset.next_batch(1)
+		for i in range(n_of_elements):
+			batch_x, batch_y = testing_dataset.next_batch(1)
 			o = sess.run(self.output, feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 1})
 			EMB[i] = o[0]
 			if batch_y[0][0] == 0:

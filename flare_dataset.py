@@ -229,6 +229,7 @@ def generate_test_train(data, labels, norm_func, should_augment):
 
 	if should_augment:
 		training_data, training_labels = apply_augmentation(training_data, training_labels)
+		training_data, training_labels = shuffle(training_data, training_labels)
 
 	testing_data = data[split_at:]
 	testing_labels = labels[split_at:]
