@@ -50,7 +50,7 @@ tf.app.flags.DEFINE_integer('training_iters', 20000,
 tf.app.flags.DEFINE_integer('n_cells', 1,
 							"""Number RNN cells.""")
 
-tf.app.flags.DEFINE_boolean('is_lstm', False,
+tf.app.flags.DEFINE_string('cell_type', "BASIC_RNN",
 							"""Pick if lstm or gru cell.""")
 
 tf.app.flags.DEFINE_boolean('should_augment', True,
@@ -70,7 +70,7 @@ def main(argv=None):
 	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, should_augment=FLAGS.should_augment)
 
 	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=FLAGS.n_steps, n_hidden=FLAGS.n_hidden,
-						n_classes=FLAGS.n_classes, n_cells=FLAGS.n_cells, is_lstm=FLAGS.is_lstm)
+						n_classes=FLAGS.n_classes, n_cells=FLAGS.n_cells, cell_type=FLAGS.cell_type)
 
 	train_lstm = TrainRNN(lstm, dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
 						training_iters=FLAGS.training_iters, batch_size=FLAGS.batch_size,

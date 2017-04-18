@@ -36,6 +36,8 @@ def find_labels(filename):
 
 def read_data(data_root):
 
+	print("Reading data from: " + data_root)
+
 	data_path_by_name = get_files(data_root=data_root)
 	dataset_by_identifier = {}
 
