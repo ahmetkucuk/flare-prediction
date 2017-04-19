@@ -5,7 +5,7 @@ from sklearn import preprocessing
 from sklearn.utils import shuffle
 from dataset_iterator import DatasetIterator
 from dataset_iterator import MultiDatasetIterator
-
+from collections import deque
 
 def get_files(data_root):
 	data_path_by_name = {}
@@ -34,7 +34,7 @@ def find_labels(filename):
 	return timestamp, label, prior, span
 
 
-def read_data(data_root):
+def read_data(data_root, feature_indexes):
 
 	print("Reading data from: " + data_root)
 
@@ -62,7 +62,8 @@ def read_data(data_root):
 					skip_first = False
 					continue
 				features = line.replace("\"", "").replace("\n", "").split(",")
-				ts_features_in_file.append(features[1:])
+				features = features[1:]
+				ts_features_in_file.append([features[i] for i in feature_indexes])
 			dataset_by_identifier[dataset_values].append(ts_features_in_file)
 			dataset_by_identifier[dataset_labels].append(label)
 			dataset_by_identifier[dataset_id].append(timestamp)
@@ -99,14 +100,14 @@ def get_prior12_span24(data_root, norm_func, should_augment):
 	return generate_test_train(prior12_span24, prior12_span24_labels, norm_func)
 
 
-def get_data(data_root, name, norm_func, should_augment):
+def get_data(data_root, name, norm_func, augmentation_type, feature_indexes=range(14)):
 
-	dataset_by_identifier = read_data(data_root=data_root)
+	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=feature_indexes)
 
 	data = dataset_by_identifier[name]
 	labels = dataset_by_identifier[name + "_labels"]
 
-	return generate_test_train(data, labels, norm_func, should_augment)
+	return generate_test_train(data, labels, norm_func, augmentation_type)
 
 
 def extract_data_and_sort(dataset_by_identifier, dataname):
@@ -146,16 +147,33 @@ def get_multi_data(data_root, norm_func, should_augment):
 	return MultiDatasetIterator(dataset1=dataset1, dataset2=dataset2)
 
 
-def apply_augmentation(data, labels):
+def apply_augmentation(data, labels, augmentation_type):
 
-	stretched_data, stretched_labels = stretch_augmentation(data, labels)
-	#squeezed_data, squeezed_labels = squeeze_augmentation(data, labels)
+	stretched_data, stretched_labels = [], []
+	squeezed_data, squeezed_labels = [], []
+	shifted_data, shifted_labels = [], []
+
+	print(augmentation_type)
+	if augmentation_type == 0 or augmentation_type == 1:
+		print("Stretching Augmentation applied")
+		stretched_data, stretched_labels = stretch_augmentation(data, labels)
+
+	if augmentation_type == 0 or augmentation_type == 2:
+		print("Squeezing Augmentation applied")
+		squeezed_data, squeezed_labels = squeeze_augmentation(data, labels)
+
+	if augmentation_type == 0 or augmentation_type == 3:
+		print("Shifting Augmentation applied")
+		shifted_data, shifted_labels = shift_augmentation(data, labels, 10)
 
 	data = data + stretched_data
 	labels = labels + stretched_labels
 
-	#data = data + squeezed_data
-	#labels = labels + squeezed_labels
+	data = data + squeezed_data
+	labels = labels + squeezed_labels
+
+	data = data + shifted_data
+	labels = labels + shifted_labels
 
 	return data, labels
 
@@ -220,7 +238,37 @@ def squeeze_augmentation(data, labels):
 	return new_data, new_labels
 
 
-def generate_test_train(data, labels, norm_func, should_augment):
+def shift_2d_list(list2d, rotate=1):
+
+	d1_len = len(list2d)
+	new_list2d = []
+	for i in range(d1_len):
+		data = list2d[i]
+		items = deque(data)
+		items.rotate(rotate)
+		new_list2d.append(list(items))
+	return new_list2d
+
+
+def t_list(list):
+	return np.asarray(list).T.tolist()
+
+
+def shift_augmentation(data, labels, rotate):
+
+	new_data = []
+	new_labels = []
+
+	for (single_record, label) in zip(data, labels):
+		single_record = t_list(single_record)
+		single_record = shift_2d_list(single_record, rotate=rotate)
+		single_record = t_list(single_record)
+		new_data.append(single_record)
+		new_labels.append(label)
+	return new_data, new_labels
+
+
+def generate_test_train(data, labels, norm_func, augmentation_type):
 
 	n_of_records = len(data)
 	split_at = int(n_of_records*0.8)
@@ -229,8 +277,8 @@ def generate_test_train(data, labels, norm_func, should_augment):
 	training_data = data[:split_at]
 	training_labels = labels[:split_at]
 
-	if should_augment:
-		training_data, training_labels = apply_augmentation(training_data, training_labels)
+	if augmentation_type != -1:
+		training_data, training_labels = apply_augmentation(training_data, training_labels, augmentation_type)
 		training_data, training_labels = shuffle(training_data, training_labels)
 
 	testing_data = data[split_at:]

@@ -73,3 +73,11 @@ def get_norm_func(norm_type):
 		exit()
 
 	return norm_func
+
+
+def get_feature_indexes(feature_str):
+
+	if feature_str == "all":
+		return range(14)
+
+	return [int(a) for a in feature_str.split(",")]

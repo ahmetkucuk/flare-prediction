@@ -5,6 +5,7 @@ from flare_dataset import get_data
 from basic_rnn import BasicRNNModel
 from train_basic_lstm import TrainRNN
 from configurations import get_norm_func
+from configurations import get_feature_indexes
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -53,8 +54,8 @@ tf.app.flags.DEFINE_integer('n_cells', 1,
 tf.app.flags.DEFINE_string('cell_type', "BASIC_RNN",
 							"""Pick if lstm or gru cell.""")
 
-tf.app.flags.DEFINE_boolean('should_augment', True,
-							"""Pick if should augment training data.""")
+tf.app.flags.DEFINE_integer('augmentation_type', 0,
+							"""Pick if augment type on training data.""")
 
 tf.app.flags.DEFINE_string('dataset_name', "12_24",
 							"""Pick if should augment training data.""")
@@ -62,12 +63,17 @@ tf.app.flags.DEFINE_string('dataset_name', "12_24",
 tf.app.flags.DEFINE_integer('display_step', 1000,
 							"""Print results after x steps.""")
 
+tf.app.flags.DEFINE_string('feature_indexes', "1",
+							"""Feature that will be included.""")
+
 
 def main(argv=None):
 
 	norm_func = get_norm_func(FLAGS.norm_type)
+	feature_indexes = get_feature_indexes(FLAGS.feature_indexes)
 
-	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, should_augment=FLAGS.should_augment)
+	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=FLAGS.augmentation_type, feature_indexes=feature_indexes)
+	print("Length of Dataset: " + str(dataset.size()))
 
 	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=FLAGS.n_steps, n_hidden=FLAGS.n_hidden,
 						n_classes=FLAGS.n_classes, n_cells=FLAGS.n_cells, cell_type=FLAGS.cell_type)
