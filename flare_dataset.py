@@ -63,7 +63,8 @@ def read_data(data_root, feature_indexes):
 					continue
 				features = line.replace("\"", "").replace("\n", "").split(",")
 				features = features[1:]
-				ts_features_in_file.append([features[i] for i in feature_indexes])
+				features = [features[i] for i in feature_indexes]
+				ts_features_in_file.append(features)
 			dataset_by_identifier[dataset_values].append(ts_features_in_file)
 			dataset_by_identifier[dataset_labels].append(label)
 			dataset_by_identifier[dataset_id].append(timestamp)
@@ -164,7 +165,7 @@ def apply_augmentation(data, labels, augmentation_type):
 
 	if augmentation_type == 0 or augmentation_type == 3:
 		print("Shifting Augmentation applied")
-		shifted_data, shifted_labels = shift_augmentation(data, labels, 10)
+		shifted_data, shifted_labels = shift_augmentation(data, labels, 5)
 
 	data = data + stretched_data
 	labels = labels + stretched_labels

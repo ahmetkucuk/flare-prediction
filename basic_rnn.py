@@ -5,7 +5,7 @@ import tensorflow.contrib.rnn as rnn
 
 class BasicRNNModel(object):
 
-	def __init__(self, n_input=14, n_steps=60, n_hidden=256, n_classes=2, n_cells=2, dropout_keep_prob=0.9, cell_type="LSTM"):
+	def __init__(self, n_input=14, n_steps=60, n_hidden=256, n_classes=2, n_cells=2, cell_type="LSTM"):
 		# tf Graph input
 		self.x = tf.placeholder(tf.float32, [None, n_steps, n_input])
 		self.dropout = tf.placeholder(tf.float32)
@@ -35,17 +35,17 @@ class BasicRNNModel(object):
 		#lstm_cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
 
 		if cell_type == "LSTM":
-			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.BasicLSTMCell(n_hidden, forget_bias=1.0), dropout_keep_prob) for _ in range(n_cells)])
+			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.BasicLSTMCell(n_hidden, forget_bias=1.0), self.dropout) for _ in range(n_cells)])
 		elif cell_type == "GRU":
-			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.GRUCell(n_hidden), dropout_keep_prob) for _ in range(n_cells)])
+			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.GRUCell(n_hidden), self.dropout) for _ in range(n_cells)])
 		elif cell_type == "LSTM_BLOCK":
-			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.LSTMBlockCell(n_hidden), dropout_keep_prob) for _ in range(n_cells)])
+			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.LSTMBlockCell(n_hidden), self.dropout) for _ in range(n_cells)])
 		elif cell_type == "LAYER_NORM_LSTM":
-			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.LayerNormBasicLSTMCell(n_hidden), dropout_keep_prob) for _ in range(n_cells)])
+			stacked_cells = rnn.MultiRNNCell([rnn.LayerNormBasicLSTMCell(n_hidden, dropout_keep_prob=self.dropout) for _ in range(n_cells)])
 		elif cell_type == "BASIC_RNN":
-			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.BasicRNNCell(n_hidden), dropout_keep_prob) for _ in range(n_cells)])
+			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.BasicRNNCell(n_hidden), self.dropout) for _ in range(n_cells)])
 		elif cell_type == "NAS":
-			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.NASCell(n_hidden), dropout_keep_prob) for _ in range(n_cells)])
+			stacked_cells = rnn.MultiRNNCell([rnn.DropoutWrapper(rnn.NASCell(n_hidden), self.dropout) for _ in range(n_cells)])
 		else:
 			print("cell type not recognized: " + cell_type)
 			exit()
