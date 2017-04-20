@@ -10,19 +10,19 @@ DATASET_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/ARFinal
 
 python ./../main.py \
   --train_dir=${TRAIN_DIR} \
-  --norm_type=z_score \
-  --n_input=14 \
+  --norm_type=zero_center \
+  --n_input=1 \
   --dataset_dir=${DATASET_DIR} \
-  --n_hidden=32 \
-  --n_steps=60 \
+  --n_hidden=128 \
+  --n_steps=120 \
   --n_classes=2 \
   --learning_rate=0.0001 \
   --training_iters=120000 \
   --n_cells=1 \
   --dropout=0.7 \
   --batch_size=20 \
-  --cell_type=LAYER_NORM_LSTM \
-  --augmentation_type=2 \
-  --dataset_name=12_12 \
+  --cell_type=GRU \
+  --augmentation_type=1 \
+  --dataset_name=12_24 \
   --display_step=100 \
-  --feature_indexes=all \
+  --feature_indexes=13 \

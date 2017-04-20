@@ -58,21 +58,28 @@ def norm_pca_whiten(data):
 	return _data
 
 
+def no_norm(data):
+	data = np.nan_to_num(data)
+	return data
+
+
 def get_norm_func(norm_type):
 
 	if norm_type == 'min_max':
-		norm_func = norm_min_max
+		return norm_min_max
 	elif norm_type == 'z_score':
-		norm_func = norm_z_score
+		return norm_z_score
 	elif norm_type == 'zero_center':
-		norm_func = norm_zero_center
+		return norm_zero_center
 	elif norm_type == 'pca_whiten':
-		norm_func = norm_pca_whiten
+		return norm_pca_whiten
+	elif norm_type == 'no_norm':
+		return no_norm
 	else:
 		print("invalid config norm_func name")
 		exit()
 
-	return norm_func
+	return None
 
 
 def get_feature_indexes(feature_str):
