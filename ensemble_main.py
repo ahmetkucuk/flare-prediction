@@ -45,14 +45,8 @@ tf.app.flags.DEFINE_integer('batch_size', 20,
 tf.app.flags.DEFINE_integer('training_iters', 40000,
                             """Number of iterations.""")
 
-tf.app.flags.DEFINE_integer('n_cells', 1,
-                            """Number RNN cells.""")
-
 tf.app.flags.DEFINE_boolean('is_lstm', False,
                             """Pick if lstm or gru cell.""")
-
-tf.app.flags.DEFINE_boolean('should_augment', True,
-                            """Pick if should augment training data.""")
 
 tf.app.flags.DEFINE_string('dataset_name', "12_24",
                            """Pick if should augment training data.""")
@@ -64,11 +58,13 @@ tf.app.flags.DEFINE_integer('display_step', 100,
 def main(args=None):
     norm_func = get_norm_func(FLAGS.norm_type)
 
-    dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, should_augment=True)
+    dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=-1, feature_indexes=[13])
+    n_hidden = 128
+    n_steps = 120
 
     train_lstm = EnsembleRNN(dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
                           training_iters=FLAGS.training_iters, batch_size=FLAGS.batch_size,
-                          display_step=FLAGS.display_step, dropout_val=FLAGS.dropout)
+                          display_step=FLAGS.display_step, dropout_val=FLAGS.dropout, n_hidden=n_hidden, n_steps=n_steps)
     train_lstm.train()
 
 

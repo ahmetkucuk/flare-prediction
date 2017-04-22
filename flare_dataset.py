@@ -6,6 +6,8 @@ from sklearn.utils import shuffle
 from dataset_iterator import DatasetIterator
 from dataset_iterator import MultiDatasetIterator
 from collections import deque
+from sklearn.preprocessing import Imputer
+
 
 def get_files(data_root):
 	data_path_by_name = {}
@@ -32,6 +34,16 @@ def find_labels(filename):
 	if "noflare" in filename:
 		label = [0, 1]
 	return timestamp, label, prior, span
+
+
+def impute_by_mean(data):
+
+	data = np.array(data, dtype=np.float32)
+
+	imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+	imputed_data = imp.fit_transform(data)
+
+	return imputed_data.tolist()
 
 
 def read_data(data_root, feature_indexes):
@@ -65,6 +77,7 @@ def read_data(data_root, feature_indexes):
 				features = features[1:]
 				features = [features[i] for i in feature_indexes]
 				ts_features_in_file.append(features)
+			ts_features_in_file = impute_by_mean(ts_features_in_file)
 			dataset_by_identifier[dataset_values].append(ts_features_in_file)
 			dataset_by_identifier[dataset_labels].append(label)
 			dataset_by_identifier[dataset_id].append(timestamp)
@@ -121,9 +134,9 @@ def extract_data_and_sort(dataset_by_identifier, dataname):
 	return ids, labels, data
 
 
-def get_multi_data(data_root, norm_func, should_augment):
+def get_multi_data(data_root, norm_func, augmentation_type, feature_indexes):
 
-	dataset_by_identifier = read_data(data_root=data_root)
+	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=feature_indexes)
 
 	dataname1 = "12_24"
 	dataname2 = "24_24"
@@ -143,8 +156,8 @@ def get_multi_data(data_root, norm_func, should_augment):
 			new_labels2.append(l)
 			new_data2.append(d)
 
-	dataset1 = generate_test_train(new_data1, new_labels1, norm_func, should_augment)
-	dataset2 = generate_test_train(new_data2, new_labels2, norm_func, should_augment)
+	dataset1 = generate_test_train(new_data1, new_labels1, norm_func, augmentation_type)
+	dataset2 = generate_test_train(new_data2, new_labels2, norm_func, augmentation_type)
 	return MultiDatasetIterator(dataset1=dataset1, dataset2=dataset2)
 
 

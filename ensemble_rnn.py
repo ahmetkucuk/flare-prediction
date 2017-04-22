@@ -5,7 +5,7 @@ from basic_rnn import BasicRNNModel
 
 class EnsembleRNN(object):
 
-	def __init__(self, dataset, model_dir, learning_rate=0.001, training_iters=30000, batch_size=20, display_step=100, dropout_val=0.7):
+	def __init__(self, dataset, model_dir, learning_rate=0.001, training_iters=30000, batch_size=20, display_step=100, dropout_val=0.7, n_hidden=128, n_steps=60):
 
 		with tf.variable_scope("ensemble"):
 
@@ -17,8 +17,9 @@ class EnsembleRNN(object):
 			self.display_step = display_step
 			self.dropout_val = dropout_val
 
+
 			self.weights = {
-				'ensemble_weights': tf.Variable(tf.random_normal([32, 2])),
+				'ensemble_weights': tf.Variable(tf.random_normal([n_hidden*2, 2])),
 			}
 
 			self.biases = {
@@ -26,12 +27,12 @@ class EnsembleRNN(object):
 			}
 
 			with tf.variable_scope("model1"):
-				lstm1 = BasicRNNModel(n_input=14, n_steps=120, n_hidden=16,
-									  n_classes=2, n_cells=2, is_lstm=True)
+				lstm1 = BasicRNNModel(n_input=1, n_steps=n_steps, n_hidden=n_hidden,
+									  n_classes=2, n_cells=1, cell_type='GRU')
 
 			with tf.variable_scope("model2"):
-				lstm2 = BasicRNNModel(n_input=14, n_steps=120, n_hidden=16,
-									  n_classes=2, n_cells=2, is_lstm=True)
+				lstm2 = BasicRNNModel(n_input=1, n_steps=n_steps, n_hidden=n_hidden,
+									  n_classes=2, n_cells=1, cell_type='GRU')
 
 			self.x1, self.dropout1 = lstm1.get_placeholders()
 			self.output1 = lstm1.get_output()
@@ -91,7 +92,3 @@ class EnsembleRNN(object):
 		train_writer.close()
 		test_writer.close()
 		print("Optimization Finished!")
-
-
-
-
