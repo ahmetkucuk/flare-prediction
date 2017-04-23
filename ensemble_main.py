@@ -2,6 +2,7 @@
 import tensorflow as tf
 from basic_rnn import BasicRNNModel
 from flare_dataset import get_multi_data
+from flare_dataset import get_multi_feature
 from configurations import get_norm_func
 from ensemble_rnn import EnsembleRNN
 
@@ -55,10 +56,17 @@ tf.app.flags.DEFINE_integer('display_step', 100,
                             """Print results after x steps.""")
 
 
+tf.app.flags.DEFINE_boolean('is_multi_feature', True,
+                            """Print results after x steps.""")
+
+
 def main(args=None):
     norm_func = get_norm_func(FLAGS.norm_type)
 
-    dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=-1, feature_indexes=[13])
+    if FLAGS.is_multi_feature:
+        dataset = get_multi_feature(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=-1, f1=[13], f2=[12])
+    else:
+        dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=-1, feature_indexes=[13])
     n_hidden = 128
     n_steps = 120
 

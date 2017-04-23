@@ -35,13 +35,17 @@ class DatasetIterator(object):
 
 class MultiDatasetIterator(object):
 
-	def __init__(self, dataset1, dataset2):
+	def __init__(self, dataset1, dataset2, test_dataset1, test_dataset2):
 		self.dataset1 = dataset1
 		self.dataset2 = dataset2
+		self.test_dataset1 = test_dataset1
+		self.test_dataset2 = test_dataset2
 		if dataset1.size() != dataset2.size():
 			print("There is serios error in Multi dataset creation")
-		if np.isclose(self.dataset1.get_all_labels(), self.dataset2.get_all_labels()).all():
+		if not np.isclose(self.dataset1.get_all_labels(), self.dataset2.get_all_labels()).all():
 			print("There is serios error in Multi dataset creation")
+		if not np.isclose(self.test_dataset1.get_all_labels(), self.test_dataset2.get_all_labels()).all():
+			print("There is serios error in Multi dataset creation for TEST")
 
 	def next_batch(self, batch_size):
 		batched_data1, batched_labels1 = self.dataset1.next_batch(batch_size)
@@ -49,6 +53,4 @@ class MultiDatasetIterator(object):
 		return batched_data1, batched_data2, batched_labels1
 
 	def get_test(self):
-		batched_data1, batched_labels1 = self.dataset1.get_test()
-		batched_data2, batched_labels2 = self.dataset2.get_test()
-		return batched_data1, batched_data2, batched_labels1
+		return self.test_dataset1.get_all_data(), self.test_dataset2.get_all_data(), self.test_dataset1.get_all_labels()

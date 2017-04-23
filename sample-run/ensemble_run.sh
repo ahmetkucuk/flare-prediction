@@ -21,4 +21,5 @@ python ./../ensemble_main.py \
   --batch_size=20 \
   --cell_type=GRU \
   --augmentation_type=1 \
-  --display_step=100
+  --display_step=100 \
+  --is_multi_feature=True

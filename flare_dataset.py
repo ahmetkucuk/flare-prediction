@@ -130,7 +130,7 @@ def extract_data_and_sort(dataset_by_identifier, dataname):
 	labels = dataset_by_identifier[dataname + "_labels"]
 	ids = dataset_by_identifier[dataname + "_ids"]
 
-	ids, labels, data = zip(*sorted(zip(ids, labels, data)))
+	ids, labels, data = zip(*sorted(zip(ids, labels, data), key=lambda t: t[0]))
 	return ids, labels, data
 
 
@@ -145,20 +145,44 @@ def get_multi_data(data_root, norm_func, augmentation_type, feature_indexes):
 
 	new_labels1, new_data1 = [], []
 	new_labels2, new_data2 = [], []
+	new_ids1, new_ids2 = [], []
 	common_records = set(ids1).intersection(set(ids2))
+
 	for id, l, d in zip(ids1, labels1, data1):
 		if id in common_records:
-			new_labels1.append(l)
 			new_data1.append(d)
+			new_labels1.append(l)
+			new_ids1.append(id)
 
 	for id, l, d in zip(ids2, labels2, data2):
 		if id in common_records:
-			new_labels2.append(l)
 			new_data2.append(d)
+			new_labels2.append(l)
 
-	dataset1 = generate_test_train(new_data1, new_labels1, norm_func, augmentation_type)
-	dataset2 = generate_test_train(new_data2, new_labels2, norm_func, augmentation_type)
-	return MultiDatasetIterator(dataset1=dataset1, dataset2=dataset2)
+	if not np.isclose(np.array(new_labels1).astype("int8"), np.array(new_labels2).astype("int8")).all():
+		print("There is serios error in Multi dataset creation")
+		exit()
+	return generate_multi_test_train(data1=new_data1, data2=new_data2, labels=new_labels1, norm_func=norm_func, augmentation_type=augmentation_type)
+
+
+def get_multi_feature(data_root, norm_func, augmentation_type, f1, f2):
+
+	dataname = "24_24"
+	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=f1)
+
+	data1 = dataset_by_identifier[dataname]
+	labels1 = dataset_by_identifier[dataname + "_labels"]
+
+	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=f2)
+
+	data2 = dataset_by_identifier[dataname]
+	labels2 = dataset_by_identifier[dataname + "_labels"]
+
+	if not np.isclose(np.array(labels1).astype("int8"), np.array(labels2).astype("int8")).all():
+		print("There is serios error in Multi dataset creation")
+		exit()
+
+	return generate_multi_test_train(data1=data1, data2=data2, labels=labels1, norm_func=norm_func, augmentation_type=augmentation_type)
 
 
 def apply_augmentation(data, labels, augmentation_type):
@@ -301,3 +325,34 @@ def generate_test_train(data, labels, norm_func, augmentation_type):
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
 	return DatasetIterator(x, y, test_x, test_y)
+
+
+def generate_multi_test_train(data1, data2, labels, norm_func, augmentation_type):
+
+	n_of_records = len(data1)
+
+	split_at = int(n_of_records*0.8)
+
+	data1, data2, labels = shuffle(data1, data2, labels)
+	training_data1 = data1[:split_at]
+	training_data2 = data2[:split_at]
+	training_labels = labels[:split_at]
+
+	testing_data1 = data1[split_at:]
+	testing_data2 = data2[split_at:]
+	testing_labels = labels[split_at:]
+
+	if augmentation_type != -1:
+		training_data1, training_labels = apply_augmentation(training_data1, training_labels, augmentation_type)
+		training_data2, training_labels = apply_augmentation(training_data2, training_labels, augmentation_type)
+		training_data1, training_data2, training_labels = shuffle(training_data1, training_data2, training_labels)
+
+	x1, x2, y = norm_func(np.array(training_data1).astype("float32")), norm_func(np.array(training_data2).astype("float32")), np.array(training_labels).astype("int8")
+	test_x1, test_x2, test_y = norm_func(np.array(testing_data1).astype("float32")), norm_func(np.array(testing_data2).astype("float32")), np.array(testing_labels).astype("int8")
+
+	dataset1 = DatasetIterator(data=x1, labels=y)
+	dataset2 = DatasetIterator(data=x2, labels=y)
+
+	test_dataset1 = DatasetIterator(data=test_x1, labels=test_y)
+	test_dataset2 = DatasetIterator(data=test_x2, labels=test_y)
+	return MultiDatasetIterator(dataset1=dataset1, dataset2=dataset2, test_dataset1=test_dataset1, test_dataset2=test_dataset2)
