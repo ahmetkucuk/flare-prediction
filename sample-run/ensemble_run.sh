@@ -17,7 +17,8 @@ python ./../ensemble_main.py \
   --learning_rate=0.0001 \
   --training_iters=120000 \
   --n_cells=1 \
-  --dropout=0.7 \
+  --n_hidden=256 \
+  --dropout=0.8 \
   --batch_size=20 \
   --cell_type=GRU \
   --augmentation_type=1 \
