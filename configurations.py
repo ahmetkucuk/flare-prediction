@@ -78,3 +78,23 @@ def get_feature_indexes(feature_str):
 		return range(14)
 
 	return [int(a) for a in feature_str.split(",")]
+
+
+def get_dataset_size(dataset_name):
+
+	if dataset_name == "12_6":
+		return 30
+	if dataset_name == "12_12":
+		return 60
+	if dataset_name == "12_24":
+		return 120
+	if dataset_name == "24_6":
+		return 30
+	if dataset_name == "24_12":
+		return 60
+	if dataset_name == "24_24":
+		return 120
+
+	print("dataset name couldn't find given: " + dataset_name)
+
+	return -1

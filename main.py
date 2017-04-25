@@ -6,6 +6,7 @@ from basic_rnn import BasicRNNModel
 from train_basic_lstm import TrainRNN
 from configurations import get_norm_func
 from configurations import get_feature_indexes
+from configurations import get_dataset_size
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -25,9 +26,6 @@ tf.app.flags.DEFINE_string('norm_type', 'min_max',
 						   """Normalization Function""")
 
 tf.app.flags.DEFINE_integer('n_input', 14,
-							"""Number of inputs - number of feature.""")
-
-tf.app.flags.DEFINE_integer('n_steps', 60,
 							"""Number of inputs - number of feature.""")
 
 tf.app.flags.DEFINE_integer('n_hidden', 128,
@@ -71,13 +69,14 @@ def main(argv=None):
 
 	norm_func = get_norm_func(FLAGS.norm_type)
 	feature_indexes = get_feature_indexes(FLAGS.feature_indexes)
+	n_steps = get_dataset_size(FLAGS.dataset_name)
 	augmentation_types = [int(i) for i in FLAGS.augmentation_types.split(",")]
 	print(augmentation_types)
 
 	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
 	print("Length of Dataset: " + str(dataset.size()))
 
-	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=FLAGS.n_steps, n_hidden=FLAGS.n_hidden,
+	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=n_steps, n_hidden=FLAGS.n_hidden,
 						n_classes=FLAGS.n_classes, n_cells=FLAGS.n_cells, cell_type=FLAGS.cell_type)
 
 	train_lstm = TrainRNN(lstm, dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
