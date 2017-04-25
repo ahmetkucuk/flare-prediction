@@ -5,7 +5,7 @@ from basic_rnn import BasicRNNModel
 
 class EnsembleRNN(object):
 
-	def __init__(self, dataset, model_dir, learning_rate=0.001, training_iters=30000, batch_size=20, display_step=100, dropout_val=0.7, n_hidden=128, n_steps=60):
+	def __init__(self, dataset, model_dir, learning_rate=0.001, training_iters=30000, batch_size=20, display_step=100, dropout_val=0.7, n_hidden=128, n_steps=60,  m1_cell="GRU", m2_cell="GRU"):
 
 		with tf.variable_scope("ensemble"):
 
@@ -28,11 +28,11 @@ class EnsembleRNN(object):
 
 			with tf.variable_scope("model1"):
 				lstm1 = BasicRNNModel(n_input=1, n_steps=n_steps, n_hidden=n_hidden,
-									  n_classes=2, n_cells=1, cell_type='GRU')
+									  n_classes=2, n_cells=1, cell_type=m1_cell)
 
 			with tf.variable_scope("model2"):
 				lstm2 = BasicRNNModel(n_input=1, n_steps=n_steps, n_hidden=n_hidden,
-									  n_classes=2, n_cells=1, cell_type='LAYER_NORM_LSTM')
+									  n_classes=2, n_cells=1, cell_type=m2_cell)
 
 			self.x1, self.dropout1 = lstm1.get_placeholders()
 			self.output1 = lstm1.get_output()

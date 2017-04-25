@@ -21,6 +21,11 @@ python ./../ensemble_main.py \
   --dropout=0.8 \
   --batch_size=20 \
   --cell_type=GRU \
-  --augmentation_type=1 \
+  --augmentation_types=-1 \
+  --dataset_name=24_24 \
   --display_step=100 \
-  --is_multi_feature=True
+  --is_multi_feature=True \
+  --f1=13 \
+  --f2=12 \
+  --m1=GRU \
+  --m2=LSTM_BLOCK \

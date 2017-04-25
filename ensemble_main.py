@@ -25,7 +25,7 @@ tf.app.flags.DEFINE_string('norm_type', 'z_score',
 tf.app.flags.DEFINE_integer('n_input', 14,
                             """Number of inputs - number of feature.""")
 
-tf.app.flags.DEFINE_integer('n_steps', 60,
+tf.app.flags.DEFINE_integer('n_steps', 120,
                             """Number of inputs - number of feature.""")
 
 tf.app.flags.DEFINE_integer('n_hidden', 256,
@@ -49,30 +49,45 @@ tf.app.flags.DEFINE_integer('training_iters', 40000,
 tf.app.flags.DEFINE_boolean('is_lstm', False,
                             """Pick if lstm or gru cell.""")
 
-tf.app.flags.DEFINE_string('dataset_name', "12_24",
+tf.app.flags.DEFINE_string('dataset_name', "24_24",
                            """Pick if should augment training data.""")
 
 tf.app.flags.DEFINE_integer('display_step', 100,
                             """Print results after x steps.""")
 
-
 tf.app.flags.DEFINE_boolean('is_multi_feature', True,
                             """Print results after x steps.""")
+
+tf.app.flags.DEFINE_integer('f1', 13,
+                           """First Feature.""")
+
+tf.app.flags.DEFINE_integer('f2', 12,
+                            """Second Feature.""")
+
+tf.app.flags.DEFINE_string('m1', "GRU",
+                            """First Cell Type.""")
+
+tf.app.flags.DEFINE_string('m2', "GRU",
+                            """Second Cell Type.""")
+
+tf.app.flags.DEFINE_string('augmentation_types', "-1",
+                            """Augmentation Types.""")
 
 
 def main(args=None):
     norm_func = get_norm_func(FLAGS.norm_type)
-    n_steps = 120
-    dataname="24_24"
+
+    augmentation_types = [int(i) for i in FLAGS.augmentation_types.split(",")]
 
     if FLAGS.is_multi_feature:
-        dataset = get_multi_feature(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=[1], f1=[13], f2=[13], dataname=dataname)
+        dataset = get_multi_feature(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, f1=[FLAGS.f1], f2=[FLAGS.f2], dataname=FLAGS.dataset_name)
     else:
-        dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=[1], feature_indexes=[13])
+        dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=[13])
 
     train_lstm = EnsembleRNN(dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
                           training_iters=FLAGS.training_iters, batch_size=FLAGS.batch_size,
-                          display_step=FLAGS.display_step, dropout_val=FLAGS.dropout, n_hidden=FLAGS.n_hidden, n_steps=n_steps)
+                          display_step=FLAGS.display_step, dropout_val=FLAGS.dropout, n_hidden=FLAGS.n_hidden,
+                             n_steps=FLAGS.n_steps, m1_cell=FLAGS.m1, m2_cell=FLAGS.m2)
     train_lstm.train()
 
 
