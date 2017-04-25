@@ -54,7 +54,7 @@ tf.app.flags.DEFINE_integer('n_cells', 1,
 tf.app.flags.DEFINE_string('cell_type', "BASIC_RNN",
 							"""Pick if lstm or gru cell.""")
 
-tf.app.flags.DEFINE_integer('augmentation_type', 0,
+tf.app.flags.DEFINE_string('augmentation_types', "-1",
 							"""Pick if augment type on training data.""")
 
 tf.app.flags.DEFINE_string('dataset_name', "12_24",
@@ -71,8 +71,10 @@ def main(argv=None):
 
 	norm_func = get_norm_func(FLAGS.norm_type)
 	feature_indexes = get_feature_indexes(FLAGS.feature_indexes)
+	augmentation_types = [int(i) for i in FLAGS.augmentation_types.split(",")]
+	print(augmentation_types)
 
-	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=FLAGS.augmentation_type, feature_indexes=feature_indexes)
+	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
 	print("Length of Dataset: " + str(dataset.size()))
 
 	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=FLAGS.n_steps, n_hidden=FLAGS.n_hidden,

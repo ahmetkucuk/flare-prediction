@@ -28,7 +28,7 @@ tf.app.flags.DEFINE_integer('n_input', 14,
 tf.app.flags.DEFINE_integer('n_steps', 60,
                             """Number of inputs - number of feature.""")
 
-tf.app.flags.DEFINE_integer('n_hidden', 32,
+tf.app.flags.DEFINE_integer('n_hidden', 256,
                             """Number of hidden units in each RNN cell.""")
 
 tf.app.flags.DEFINE_integer('n_classes', 2,
@@ -62,17 +62,17 @@ tf.app.flags.DEFINE_boolean('is_multi_feature', True,
 
 def main(args=None):
     norm_func = get_norm_func(FLAGS.norm_type)
+    n_steps = 120
+    dataname="24_24"
 
     if FLAGS.is_multi_feature:
-        dataset = get_multi_feature(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=-1, f1=[13], f2=[12])
+        dataset = get_multi_feature(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=1, f1=[13], f2=[12], dataname=dataname)
     else:
-        dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=-1, feature_indexes=[13])
-    n_hidden = 128
-    n_steps = 120
+        dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=1, feature_indexes=[13])
 
     train_lstm = EnsembleRNN(dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
                           training_iters=FLAGS.training_iters, batch_size=FLAGS.batch_size,
-                          display_step=FLAGS.display_step, dropout_val=FLAGS.dropout, n_hidden=n_hidden, n_steps=n_steps)
+                          display_step=FLAGS.display_step, dropout_val=FLAGS.dropout, n_hidden=FLAGS.n_hidden, n_steps=n_steps)
     train_lstm.train()
 
 

@@ -73,20 +73,22 @@ class TrainRNN(object):
 		test_writer = tf.summary.FileWriter(self.model_dir + '/test', sess.graph)
 		sess.run(init)
 		step = 1
+		epochs = 0
 		# Keep training until reach max iterations
 		while step < self.training_iters:
 			batch_x, batch_y = self.dataset.next_batch(self.batch_size)
 
 			sess.run(self.optimizer, feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: self.dropout_val})
-			if step % self.display_step == 0:
-
+			epochs_count = int((self.batch_size * step) / self.dataset.size())
+			if epochs_count > epochs:
+				epochs = epochs_count
 				summary, acc = sess.run([merged, self.accuracy], feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 1})
 				train_writer.add_summary(summary=summary, global_step=step)
 
 				summary, loss = sess.run([merged, self.cost], feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 1})
 				train_writer.add_summary(summary=summary, global_step=step)
 
-				print("Iter " + str(step) + ", Minibatch Loss= " + \
+				print("Iter " + str(epochs) + ", Minibatch Loss= " + \
 					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
 					  "{:.5f}".format(acc))
 
@@ -97,6 +99,7 @@ class TrainRNN(object):
 				train_writer.flush()
 				test_writer.flush()
 			step += 1
+
 		train_writer.close()
 		test_writer.close()
 		self.create_embeddings(sess, train_writer)

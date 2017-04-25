@@ -16,13 +16,13 @@ python ./../main.py \
   --n_hidden=256 \
   --n_steps=120 \
   --n_classes=2 \
-  --learning_rate=0.00005 \
+  --learning_rate=0.0001 \
   --training_iters=120000 \
   --n_cells=1 \
-  --dropout=0.9 \
+  --dropout=0.8 \
   --batch_size=20 \
   --cell_type=GRU \
-  --augmentation_type=4 \
+  --augmentation_type=1 \
   --dataset_name=12_24 \
   --display_step=1 \
   --feature_indexes=13 \

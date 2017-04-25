@@ -5,8 +5,8 @@ from sklearn import preprocessing
 from sklearn.utils import shuffle
 from dataset_iterator import DatasetIterator
 from dataset_iterator import MultiDatasetIterator
-from collections import deque
 from sklearn.preprocessing import Imputer
+from augmentation import *
 
 
 def get_files(data_root):
@@ -114,14 +114,14 @@ def get_prior12_span24(data_root, norm_func, should_augment):
 	return generate_test_train(prior12_span24, prior12_span24_labels, norm_func)
 
 
-def get_data(data_root, name, norm_func, augmentation_type, feature_indexes=range(14)):
+def get_data(data_root, name, norm_func, augmentation_types, feature_indexes=range(14)):
 
 	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=feature_indexes)
 
 	data = dataset_by_identifier[name]
 	labels = dataset_by_identifier[name + "_labels"]
 
-	return generate_test_train(data, labels, norm_func, augmentation_type)
+	return generate_test_train(data, labels, norm_func, augmentation_types)
 
 
 def extract_data_and_sort(dataset_by_identifier, dataname):
@@ -145,29 +145,28 @@ def get_multi_data(data_root, norm_func, augmentation_type, feature_indexes):
 
 	new_labels1, new_data1 = [], []
 	new_labels2, new_data2 = [], []
-	new_ids1, new_ids2 = [], []
 	common_records = set(ids1).intersection(set(ids2))
 
 	for id, l, d in zip(ids1, labels1, data1):
 		if id in common_records:
 			new_data1.append(d)
 			new_labels1.append(l)
-			new_ids1.append(id)
 
 	for id, l, d in zip(ids2, labels2, data2):
 		if id in common_records:
 			new_data2.append(d)
 			new_labels2.append(l)
 
+	print(len(new_labels1))
+	print(len(new_labels2))
 	if not np.isclose(np.array(new_labels1).astype("int8"), np.array(new_labels2).astype("int8")).all():
 		print("There is serios error in Multi dataset creation")
 		exit()
 	return generate_multi_test_train(data1=new_data1, data2=new_data2, labels=new_labels1, norm_func=norm_func, augmentation_type=augmentation_type)
 
 
-def get_multi_feature(data_root, norm_func, augmentation_type, f1, f2):
+def get_multi_feature(data_root, norm_func, augmentation_type, f1, f2, dataname):
 
-	dataname = "24_24"
 	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=f1)
 
 	data1 = dataset_by_identifier[dataname]
@@ -185,24 +184,38 @@ def get_multi_feature(data_root, norm_func, augmentation_type, f1, f2):
 	return generate_multi_test_train(data1=data1, data2=data2, labels=labels1, norm_func=norm_func, augmentation_type=augmentation_type)
 
 
-def apply_augmentation(data, labels, augmentation_type):
+def apply_augmentation(data, labels, augmentation_types):
 
 	stretched_data, stretched_labels = [], []
 	squeezed_data, squeezed_labels = [], []
 	shifted_data, shifted_labels = [], []
+	mirror_data, mirror_labels = [], []
+	flip_data, flip_labels = [], []
+	reverse_data, reverse_labels = [], []
 
-	print(augmentation_type)
-	if augmentation_type == 0 or augmentation_type == 1:
-		print("Stretching Augmentation applied")
-		stretched_data, stretched_labels = stretch_augmentation(data, labels)
+	if STRETCH_AUGMENTATION in augmentation_types:
+		stretched_data, stretched_labels = stretch_augmentation(list(data), list(labels))
+	print("Stretching Augmentation applied")
 
-	if augmentation_type == 0 or augmentation_type == 2:
+	if SQUEEZE_AUGMENTATION in augmentation_types:
+		squeezed_data, squeezed_labels = squeeze_augmentation(list(data), list(labels))
 		print("Squeezing Augmentation applied")
-		squeezed_data, squeezed_labels = squeeze_augmentation(data, labels)
 
-	if augmentation_type == 0 or augmentation_type == 3:
+	if SHIFT_AUGMENTATION in augmentation_types:
+		shifted_data, shifted_labels = shift_augmentation(list(data), list(labels), 5)
 		print("Shifting Augmentation applied")
-		shifted_data, shifted_labels = shift_augmentation(data, labels, 5)
+
+	if MIRROR_AUGMENTATION in augmentation_types:
+		mirror_data, mirror_labels = mirror_augmentation(list(data), list(labels))
+		print("Mirror Augmentation applied")
+
+	if FLIP_AUGMENTATION in augmentation_types:
+		flip_data, flip_labels = flip_augmentation(list(data), list(labels))
+		print("FLIP Augmentation applied")
+
+	if REVERSE_AUGMENTATION in augmentation_types:
+		reverse_data, reverse_labels = reverse_augmentation(list(data), list(labels))
+		print("Reverse Augmentation applied")
 
 	data = data + stretched_data
 	labels = labels + stretched_labels
@@ -213,100 +226,19 @@ def apply_augmentation(data, labels, augmentation_type):
 	data = data + shifted_data
 	labels = labels + shifted_labels
 
+	data = data + mirror_data
+	labels = labels + mirror_labels
+
+	data = data + flip_data
+	labels = labels + flip_labels
+
+	data = data + reverse_data
+	labels = labels + reverse_labels
+
 	return data, labels
 
 
-def double_array(data):
-	if len(data) == 0:
-		return data
-	new_data = []
-	prev = np.array(data[0], dtype=float)
-	for i in range(len(data)):
-		d_array = np.array(data[i], dtype=float)
-		new_data.append(((d_array + prev) / 2.0).tolist())
-		new_data.append(data[i])
-		prev = np.array(data[i], dtype=float)
-	return new_data
-
-
-def stretch_augmentation(data, labels):
-
-	new_data = []
-	new_labels = []
-
-	for (single_record, label) in zip(data, labels):
-
-		double_record = double_array(single_record)
-		ts_length = len(double_record)
-
-		new_single_record = []
-		for i in range(ts_length / 2):
-			new_single_record.append(double_record[i])
-
-		new_data.append(new_single_record)
-		new_labels.append(label)
-		new_single_record = []
-
-		for i in range(ts_length / 2, ts_length, 1):
-			new_single_record.append(double_record[i])
-
-		new_data.append(new_single_record)
-		new_labels.append(label)
-	return new_data, new_labels
-
-
-def squeeze_augmentation(data, labels):
-
-	new_data = []
-	new_labels = []
-
-	for (single_record, label) in zip(data, labels):
-
-		ts_length = len(single_record)
-		new_single_record = []
-
-		for i in range(0, ts_length, 2):
-			new_single_record.append(single_record[i])
-
-		for i in range(1, ts_length, 2):
-			new_single_record.append(single_record[i])
-
-		new_data.append(new_single_record)
-		new_labels.append(label)
-	return new_data, new_labels
-
-
-def shift_2d_list(list2d, rotate=1):
-
-	d1_len = len(list2d)
-	new_list2d = []
-	for i in range(d1_len):
-		data = list2d[i]
-		items = deque(data)
-		items.rotate(rotate)
-		new_list2d.append(list(items))
-	return new_list2d
-
-
-def t_list(list):
-	return np.asarray(list).T.tolist()
-
-
-def shift_augmentation(data, labels, rotate):
-
-	new_data = []
-	new_labels = []
-
-	for (single_record, label) in zip(data, labels):
-		single_record = t_list(single_record)
-		single_record = shift_2d_list(single_record, rotate=rotate)
-		single_record = t_list(single_record)
-		new_data.append(single_record)
-		new_labels.append(label)
-	return new_data, new_labels
-
-
-def generate_test_train(data, labels, norm_func, augmentation_type):
+def generate_test_train(data, labels, norm_func, augmentation_types):
 
 	n_of_records = len(data)
 	split_at = int(n_of_records*0.8)
@@ -315,8 +247,8 @@ def generate_test_train(data, labels, norm_func, augmentation_type):
 	training_data = data[:split_at]
 	training_labels = labels[:split_at]
 
-	if augmentation_type != -1:
-		training_data, training_labels = apply_augmentation(training_data, training_labels, augmentation_type)
+	if not NO_AUGMENTATION in augmentation_types:
+		training_data, training_labels = apply_augmentation(training_data, training_labels, augmentation_types)
 		training_data, training_labels = shuffle(training_data, training_labels)
 
 	testing_data = data[split_at:]
@@ -344,7 +276,7 @@ def generate_multi_test_train(data1, data2, labels, norm_func, augmentation_type
 
 	if augmentation_type != -1:
 		training_data1, training_labels = apply_augmentation(training_data1, training_labels, augmentation_type)
-		training_data2, training_labels = apply_augmentation(training_data2, training_labels, augmentation_type)
+		training_data2, _ = apply_augmentation(training_data2, training_labels, augmentation_type)
 		training_data1, training_data2, training_labels = shuffle(training_data1, training_data2, training_labels)
 
 	x1, x2, y = norm_func(np.array(training_data1).astype("float32")), norm_func(np.array(training_data2).astype("float32")), np.array(training_labels).astype("int8")
