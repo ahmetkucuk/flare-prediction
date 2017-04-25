@@ -124,6 +124,23 @@ def get_data(data_root, name, norm_func, augmentation_types, feature_indexes=ran
 	return generate_test_train(data, labels, norm_func, augmentation_types)
 
 
+def get_merged_data(data_root, span, norm_func, augmentation_types, feature_indexes=range(14)):
+
+	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=feature_indexes)
+	d1 = "12_" + span
+	d2 = "24_" + span
+
+	data1 = dataset_by_identifier[d1]
+	labels1 = dataset_by_identifier[d1 + "_labels"]
+	data2 = dataset_by_identifier[d2]
+	labels2 = dataset_by_identifier[d2 + "_labels"]
+
+	data = data1 + data2
+	labels = labels1 + labels2
+
+	return generate_test_train(data, labels, norm_func, augmentation_types)
+
+
 def extract_data_and_sort(dataset_by_identifier, dataname):
 
 	data = dataset_by_identifier[dataname]

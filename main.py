@@ -7,6 +7,7 @@ from train_basic_lstm import TrainRNN
 from configurations import get_norm_func
 from configurations import get_feature_indexes
 from configurations import get_dataset_size
+from flare_dataset import get_merged_data
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -64,16 +65,25 @@ tf.app.flags.DEFINE_integer('display_step', 1000,
 tf.app.flags.DEFINE_string('feature_indexes', "1",
 							"""Feature that will be included.""")
 
+tf.app.flags.DEFINE_string('span', "24",
+						   """Feature that will be included.""")
+
+tf.app.flags.DEFINE_boolean('use_merged_data', False,
+						   """Should use merged data.""")
+
 
 def main(argv=None):
 
 	norm_func = get_norm_func(FLAGS.norm_type)
 	feature_indexes = get_feature_indexes(FLAGS.feature_indexes)
-	n_steps = get_dataset_size(FLAGS.dataset_name)
 	augmentation_types = [int(i) for i in FLAGS.augmentation_types.split(",")]
 	print(augmentation_types)
-
-	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
+	if FLAGS.use_merged_data:
+		n_steps = get_dataset_size("12_" + FLAGS.span)
+		dataset = get_merged_data(span=FLAGS.span, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
+	else:
+		n_steps = get_dataset_size(FLAGS.dataset_name)
+		dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
 	print("Length of Dataset: " + str(dataset.size()))
 
 	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=n_steps, n_hidden=FLAGS.n_hidden,
