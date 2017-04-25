@@ -88,7 +88,7 @@ class TrainRNN(object):
 				summary, loss = sess.run([merged, self.cost], feed_dict={self.x: batch_x, self.y: batch_y, self.dropout: 1})
 				train_writer.add_summary(summary=summary, global_step=step)
 
-				print("Iter " + str(epochs) + ", Minibatch Loss= " + \
+				print("Epoch " + str(epochs) + ", Minibatch Loss= " + \
 					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
 					  "{:.5f}".format(acc))
 

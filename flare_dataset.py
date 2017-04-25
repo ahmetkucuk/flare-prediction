@@ -134,7 +134,7 @@ def extract_data_and_sort(dataset_by_identifier, dataname):
 	return ids, labels, data
 
 
-def get_multi_data(data_root, norm_func, augmentation_type, feature_indexes):
+def get_multi_data(data_root, norm_func, augmentation_types, feature_indexes):
 
 	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=feature_indexes)
 
@@ -162,10 +162,10 @@ def get_multi_data(data_root, norm_func, augmentation_type, feature_indexes):
 	if not np.isclose(np.array(new_labels1).astype("int8"), np.array(new_labels2).astype("int8")).all():
 		print("There is serios error in Multi dataset creation")
 		exit()
-	return generate_multi_test_train(data1=new_data1, data2=new_data2, labels=new_labels1, norm_func=norm_func, augmentation_type=augmentation_type)
+	return generate_multi_test_train(data1=new_data1, data2=new_data2, labels=new_labels1, norm_func=norm_func, augmentation_types=augmentation_types)
 
 
-def get_multi_feature(data_root, norm_func, augmentation_type, f1, f2, dataname):
+def get_multi_feature(data_root, norm_func, augmentation_types, f1, f2, dataname):
 
 	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=f1)
 
@@ -181,7 +181,7 @@ def get_multi_feature(data_root, norm_func, augmentation_type, f1, f2, dataname)
 		print("There is serios error in Multi dataset creation")
 		exit()
 
-	return generate_multi_test_train(data1=data1, data2=data2, labels=labels1, norm_func=norm_func, augmentation_type=augmentation_type)
+	return generate_multi_test_train(data1=data1, data2=data2, labels=labels1, norm_func=norm_func, augmentation_types=augmentation_types)
 
 
 def apply_augmentation(data, labels, augmentation_types):
@@ -259,7 +259,7 @@ def generate_test_train(data, labels, norm_func, augmentation_types):
 	return DatasetIterator(x, y, test_x, test_y)
 
 
-def generate_multi_test_train(data1, data2, labels, norm_func, augmentation_type):
+def generate_multi_test_train(data1, data2, labels, norm_func, augmentation_types):
 
 	n_of_records = len(data1)
 
@@ -274,9 +274,9 @@ def generate_multi_test_train(data1, data2, labels, norm_func, augmentation_type
 	testing_data2 = data2[split_at:]
 	testing_labels = labels[split_at:]
 
-	if augmentation_type != -1:
-		training_data1, training_labels = apply_augmentation(training_data1, training_labels, augmentation_type)
-		training_data2, _ = apply_augmentation(training_data2, training_labels, augmentation_type)
+	if not NO_AUGMENTATION in augmentation_types:
+		training_data1, training_labels = apply_augmentation(training_data1, training_labels, augmentation_types)
+		training_data2, _ = apply_augmentation(training_data2, training_labels, augmentation_types)
 		training_data1, training_data2, training_labels = shuffle(training_data1, training_data2, training_labels)
 
 	x1, x2, y = norm_func(np.array(training_data1).astype("float32")), norm_func(np.array(training_data2).astype("float32")), np.array(training_labels).astype("int8")

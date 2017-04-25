@@ -66,9 +66,9 @@ def main(args=None):
     dataname="24_24"
 
     if FLAGS.is_multi_feature:
-        dataset = get_multi_feature(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=1, f1=[13], f2=[12], dataname=dataname)
+        dataset = get_multi_feature(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=[1], f1=[13], f2=[13], dataname=dataname)
     else:
-        dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_type=1, feature_indexes=[13])
+        dataset = get_multi_data(data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=[1], feature_indexes=[13])
 
     train_lstm = EnsembleRNN(dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
                           training_iters=FLAGS.training_iters, batch_size=FLAGS.batch_size,

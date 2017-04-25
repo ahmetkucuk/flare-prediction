@@ -22,7 +22,7 @@ python ./../main.py \
   --dropout=0.8 \
   --batch_size=20 \
   --cell_type=GRU \
-  --augmentation_type=1 \
+  --augmentation_type=6 \
   --dataset_name=12_24 \
   --display_step=1 \
   --feature_indexes=13 \
