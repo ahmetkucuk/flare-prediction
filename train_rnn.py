@@ -75,7 +75,7 @@ class TrainRNN(object):
 								"\n")
 
 	def write_probs_to_file(self, epochs, ids, probs):
-		with open("test_probabilities_epoch" + str(epochs) + ".txt", "w") as prob_file:
+		with open(self.model_dir + '/test/test_probabilities_epoch' + str(epochs) + '.txt', 'w') as prob_file:
 			for id, prob in zip(ids, probs):
 				prob_argmax = np.argmax(prob)
 				prob_file.write(str(id) + "\t" + str(prob[0]) + "\t" + str(prob[1]) + "\t" + ("noflare" if prob_argmax == 1 else "flare") + "\n")
