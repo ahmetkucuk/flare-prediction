@@ -85,43 +85,15 @@ def read_data(data_root, feature_indexes):
 	return dataset_by_identifier
 
 
-def get_prior12_span12(data_root, norm_func):
-
-	dataset_by_identifier = read_data(data_root=data_root)
-
-	prior12_span12 = dataset_by_identifier["12_12"]
-	prior12_span12_labels = dataset_by_identifier["12_12_labels"]
-
-	return generate_test_train(prior12_span12, prior12_span12_labels, norm_func)
-
-
-def get_raw_prior12_span24(data_root):
-
-	dataset_by_identifier = read_data(data_root=data_root)
-
-	prior12_span24 = dataset_by_identifier["12_24"]
-	prior12_span24_labels = dataset_by_identifier["12_24_labels"]
-	return prior12_span24, prior12_span24_labels
-
-
-def get_prior12_span24(data_root, norm_func, should_augment):
-
-	dataset_by_identifier = read_data(data_root=data_root)
-
-	prior12_span24 = dataset_by_identifier["12_24"]
-	prior12_span24_labels = dataset_by_identifier["12_24_labels"]
-
-	return generate_test_train(prior12_span24, prior12_span24_labels, norm_func)
-
-
 def get_data(data_root, name, norm_func, augmentation_types, feature_indexes=range(14)):
 
 	dataset_by_identifier = read_data(data_root=data_root, feature_indexes=feature_indexes)
 
 	data = dataset_by_identifier[name]
 	labels = dataset_by_identifier[name + "_labels"]
+	ids = dataset_by_identifier[name + "_ids"]
 
-	return generate_test_train(data, labels, norm_func, augmentation_types)
+	return generate_test_train(data, labels, ids, norm_func, augmentation_types)
 
 
 def get_merged_data(data_root, span, norm_func, augmentation_types, feature_indexes=range(14)):
@@ -132,13 +104,17 @@ def get_merged_data(data_root, span, norm_func, augmentation_types, feature_inde
 
 	data1 = dataset_by_identifier[d1]
 	labels1 = dataset_by_identifier[d1 + "_labels"]
+	ids1 = dataset_by_identifier[d1 + "_ids"]
+
 	data2 = dataset_by_identifier[d2]
 	labels2 = dataset_by_identifier[d2 + "_labels"]
+	ids2 = dataset_by_identifier[d2 + "_ids"]
 
 	data = data1 + data2
 	labels = labels1 + labels2
+	ids = ids1 + ids2
 
-	return generate_test_train(data, labels, norm_func, augmentation_types)
+	return generate_test_train(data, labels, ids, norm_func, augmentation_types)
 
 
 def extract_data_and_sort(dataset_by_identifier, dataname):
@@ -255,25 +231,26 @@ def apply_augmentation(data, labels, augmentation_types):
 	return data, labels
 
 
-def generate_test_train(data, labels, norm_func, augmentation_types):
+def generate_test_train(data, labels, ids, norm_func, augmentation_types):
 
 	n_of_records = len(data)
 	split_at = int(n_of_records*0.8)
 
-	data, labels = shuffle(data, labels)
+	data, labels, ids = shuffle(data, labels, ids)
 	training_data = data[:split_at]
 	training_labels = labels[:split_at]
+
+	testing_data = data[split_at:]
+	testing_labels = labels[split_at:]
+	testing_ids = ids[split_at:]
 
 	if not NO_AUGMENTATION in augmentation_types:
 		training_data, training_labels = apply_augmentation(training_data, training_labels, augmentation_types)
 		training_data, training_labels = shuffle(training_data, training_labels)
 
-	testing_data = data[split_at:]
-	testing_labels = labels[split_at:]
-
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
-	return DatasetIterator(x, y, test_x, test_y)
+	return DatasetIterator(x, y, test_ids=testing_ids, test_data=test_x, test_labels=test_y)
 
 
 def generate_multi_test_train(data1, data2, labels, norm_func, augmentation_types):

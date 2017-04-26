@@ -3,10 +3,11 @@ import numpy as np
 
 class DatasetIterator(object):
 
-	def __init__(self, data, labels, test_data=None, test_labels=None):
+	def __init__(self, data, labels, test_ids=None, test_data=None, test_labels=None):
 		self.data = data
 		self.labels = labels
 		self.batch_index = 0
+		self.test_ids = test_ids
 		self.test_data = test_data
 		self.test_labels = test_labels
 
@@ -27,7 +28,7 @@ class DatasetIterator(object):
 		return len(self.data)
 
 	def get_test(self):
-		return self.test_data, self.test_labels
+		return self.test_ids, self.test_data, self.test_labels
 
 	def get_test_as_datasetiterator(self):
 		return DatasetIterator(data=self.test_data, labels=self.test_labels)
@@ -41,11 +42,14 @@ class MultiDatasetIterator(object):
 		self.test_dataset1 = test_dataset1
 		self.test_dataset2 = test_dataset2
 		if dataset1.size() != dataset2.size():
-			print("There is serios error in Multi dataset creation")
+			print("There is serious error in Multi dataset creation")
+			exit()
 		if not np.isclose(self.dataset1.get_all_labels(), self.dataset2.get_all_labels()).all():
-			print("There is serios error in Multi dataset creation")
+			print("There is serious error in Multi dataset creation")
+			exit()
 		if not np.isclose(self.test_dataset1.get_all_labels(), self.test_dataset2.get_all_labels()).all():
-			print("There is serios error in Multi dataset creation for TEST")
+			print("There is serious error in Multi dataset creation for TEST")
+			exit()
 
 	def next_batch(self, batch_size):
 		batched_data1, batched_labels1 = self.dataset1.next_batch(batch_size)

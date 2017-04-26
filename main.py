@@ -1,9 +1,8 @@
 import sys
 import tensorflow as tf
-from flare_dataset import get_prior12_span12
 from flare_dataset import get_data
 from basic_rnn import BasicRNNModel
-from train_basic_lstm import TrainRNN
+from train_rnn import TrainRNN
 from configurations import get_norm_func
 from configurations import get_feature_indexes
 from configurations import get_dataset_size

@@ -8,7 +8,7 @@ TRAIN_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/Flar
 #DATASET_DIR=/home/ahmet/Documents/Research/Time_Series/ARDataLarge
 DATASET_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/ARFinal
 
-DATASETNAME=12_24
+DATASETNAME=12_6
 
 python ./../main.py \
   --train_dir=${TRAIN_DIR} \
@@ -16,7 +16,6 @@ python ./../main.py \
   --n_input=1 \
   --dataset_dir=${DATASET_DIR} \
   --n_hidden=256 \
-  --n_steps=120 \
   --n_classes=2 \
   --learning_rate=0.0001 \
   --training_iters=120000 \
@@ -29,4 +28,4 @@ python ./../main.py \
   --display_step=1 \
   --feature_indexes=13 \
   --span=24 \
-  --use_merged_data=True \
+  --use_merged_data=False \

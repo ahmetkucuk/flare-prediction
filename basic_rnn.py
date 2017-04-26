@@ -51,12 +51,7 @@ class BasicRNNModel(object):
 			exit()
 		# Get lstm cell output
 		outputs, states = rnn.static_rnn(stacked_cells, x, dtype=tf.float32)
-		#
-		# output_flattened = tf.reshape(outputs, [-1, n_hidden])
-		# output_logits = tf.add(tf.matmul(output_flattened, self.weights['last']), self.weights['out'])
-		# output_all = tf.nn.sigmoid(output_logits)
-		# output_reshaped = tf.reshape(output_all,[-1,n_steps,n_classes])
-		# output_last = tf.gather(tf.transpose(output_reshaped,[1,0,2]), n_steps - 1)
+
 		self.output = outputs[-1]
 		self.preds = tf.matmul(outputs[-1], self.weights['out']) + self.biases['out']
 

@@ -22,6 +22,7 @@ class TrainRNN(object):
 		self.y = tf.placeholder(tf.float32, [None, 2])
 		self.preds = model.get_preds()
 		self.output = model.get_output()
+		self.probabilities = tf.nn.softmax(self.preds)
 
 		with tf.name_scope("evaluations"):
 			# Define loss and optimizer
@@ -63,6 +64,22 @@ class TrainRNN(object):
 		saver = tf.train.Saver([embedding_var])
 		saver.save(sess, self.model_dir + '/train/model.ckpt', 1)
 
+	def write_probs_and_labels_to_file(self, epochs, ids, probs, accuracy, labels):
+		with open("test_probabilities_epoch" + str(epochs) + ".txt", "w") as prob_file:
+			prob_file.write("Accuracy: " + str(accuracy) + "\n")
+			for id, prob, label in zip(ids, probs, labels):
+				prob_argmax = np.argmax(prob)
+				prob_file.write(str(id) + "\t" + str(prob[0]) + "\t" + str(prob[1]) + "\t" +
+								str(prob_argmax) + "\t" + str(label) +
+								"\t" + str(label[prob_argmax] == 1) +
+								"\n")
+
+	def write_probs_to_file(self, epochs, ids, probs):
+		with open("test_probabilities_epoch" + str(epochs) + ".txt", "w") as prob_file:
+			for id, prob in zip(ids, probs):
+				prob_argmax = np.argmax(prob)
+				prob_file.write(str(id) + "\t" + str(prob[0]) + "\t" + str(prob[1]) + "\t" + ("noflare" if prob_argmax == 1 else "flare") + "\n")
+
 	def train(self):
 		init = tf.global_variables_initializer()
 		sess = tf.Session()
@@ -92,9 +109,11 @@ class TrainRNN(object):
 					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
 					  "{:.5f}".format(acc))
 
-				test_data, test_label = self.dataset.get_test()
-				summary, accuracy = sess.run([merged, self.accuracy], feed_dict={self.x: test_data, self.y: test_label, self.dropout: 1})
+				test_ids, test_data, test_label = self.dataset.get_test()
+				summary, accuracy, probabilities = sess.run([merged, self.accuracy, self.probabilities], feed_dict={self.x: test_data, self.y: test_label, self.dropout: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
+				if epochs % 10 == 0:
+					self.write_probs_to_file(epochs, test_ids, probabilities)
 				print("Test Accuracy: {:.6f}".format(accuracy))
 				train_writer.flush()
 				test_writer.flush()
