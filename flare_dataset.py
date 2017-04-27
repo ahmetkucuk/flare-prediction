@@ -236,7 +236,7 @@ def generate_test_train(data, labels, ids, norm_func, augmentation_types):
 	n_of_records = len(data)
 	split_at = int(n_of_records*0.8)
 
-	data, labels, ids = shuffle(data, labels, ids)
+	data, labels, ids = shuffle(data, labels, ids, random_state=0)
 	training_data = data[:split_at]
 	training_labels = labels[:split_at]
 
@@ -246,7 +246,7 @@ def generate_test_train(data, labels, ids, norm_func, augmentation_types):
 
 	if not NO_AUGMENTATION in augmentation_types:
 		training_data, training_labels = apply_augmentation(training_data, training_labels, augmentation_types)
-		training_data, training_labels = shuffle(training_data, training_labels)
+		training_data, training_labels = shuffle(training_data, training_labels, random_state=0)
 
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
