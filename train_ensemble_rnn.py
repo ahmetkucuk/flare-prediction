@@ -82,7 +82,7 @@ class EnsembleRNN(object):
 					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
 					  "{:.5f}".format(acc))
 
-				test_data1, test_data2, test_label = self.dataset.get_test()
+				test_data1, test_data2, test_label = self.dataset.get_multi_test()
 				summary, accuracy = sess.run([merged, self.accuracy], feed_dict={self.x1: test_data1, self.x2: test_data2, self.y: test_label, self.dropout1: 1, self.dropout2: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
 				print("Test Accuracy: {:.6f}".format(accuracy))

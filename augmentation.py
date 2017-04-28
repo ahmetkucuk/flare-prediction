@@ -57,7 +57,6 @@ def stretch_augmentation(data, labels):
 	return new_data, new_labels
 
 
-
 def double_array(data):
 	if len(data) == 0:
 		return data

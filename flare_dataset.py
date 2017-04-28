@@ -33,6 +33,8 @@ def find_labels(filename):
 	span = get_two_char_after(filename, "Span")
 	if "noflare" in filename:
 		label = [0, 1]
+	if not "noflare" in filename and not "flare" in filename:
+		label = [0, 1]
 	return timestamp, label, prior, span
 
 
@@ -80,7 +82,7 @@ def read_data(data_root, feature_indexes):
 			ts_features_in_file = impute_by_mean(ts_features_in_file)
 			dataset_by_identifier[dataset_values].append(ts_features_in_file)
 			dataset_by_identifier[dataset_labels].append(label)
-			dataset_by_identifier[dataset_id].append(timestamp)
+			dataset_by_identifier[dataset_id].append(filename)
 
 	return dataset_by_identifier
 
@@ -92,8 +94,28 @@ def get_data(data_root, name, norm_func, augmentation_types, feature_indexes=ran
 	data = dataset_by_identifier[name]
 	labels = dataset_by_identifier[name + "_labels"]
 	ids = dataset_by_identifier[name + "_ids"]
+	print(ids)
 
 	return generate_test_train(data, labels, ids, norm_func, augmentation_types)
+
+
+def get_final_data(data_root, name, norm_func, augmentation_types, feature_indexes=range(14)):
+	train_dir = data_root + "/train"
+	test_dir = data_root + "/test"
+	train_dataset_by_identifier = read_data(data_root=train_dir, feature_indexes=feature_indexes)
+	test_dataset_by_identifier = read_data(data_root=test_dir, feature_indexes=feature_indexes)
+
+	data = train_dataset_by_identifier[name]
+
+	labels = train_dataset_by_identifier[name + "_labels"]
+	ids = train_dataset_by_identifier[name + "_ids"]
+
+	x, y, val_x, val_y = generate_train_validation(data, labels, ids, norm_func, augmentation_types)
+
+	test_ids = test_dataset_by_identifier[name + "_ids"]
+	test_data = test_dataset_by_identifier[name]
+
+	return DatasetIterator(x, y, validation_data=val_x, validation_labels=val_y, test_ids=test_ids, test_data=test_data)
 
 
 def get_merged_data(data_root, span, norm_func, augmentation_types, feature_indexes=range(14)):
@@ -150,8 +172,6 @@ def get_multi_data(data_root, norm_func, augmentation_types, feature_indexes):
 			new_data2.append(d)
 			new_labels2.append(l)
 
-	print(len(new_labels1))
-	print(len(new_labels2))
 	if not np.isclose(np.array(new_labels1).astype("int8"), np.array(new_labels2).astype("int8")).all():
 		print("There is serios error in Multi dataset creation")
 		exit()
@@ -251,6 +271,37 @@ def generate_test_train(data, labels, ids, norm_func, augmentation_types):
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
 	return DatasetIterator(x, y, test_ids=testing_ids, test_data=test_x, test_labels=test_y)
+
+
+def generate_train_validation(data, labels, ids, norm_func, augmentation_types):
+	'''
+		This methods does similar work with generate_test_train.
+		Separated bec. of not to confuse
+	:param data:
+	:param labels:
+	:param ids:
+	:param norm_func:
+	:param augmentation_types:
+	:return:
+	'''
+
+	n_of_records = len(data)
+	split_at = int(n_of_records*0.8)
+
+	data, labels, ids = shuffle(data, labels, ids, random_state=0)
+	training_data = data[:split_at]
+	training_labels = labels[:split_at]
+
+	validation_data = data[split_at:]
+	validation_labels = labels[split_at:]
+
+	if not NO_AUGMENTATION in augmentation_types:
+		training_data, training_labels = apply_augmentation(training_data, training_labels, augmentation_types)
+		training_data, training_labels = shuffle(training_data, training_labels, random_state=0)
+
+	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
+	val_x, val_y = norm_func(np.array(validation_data).astype("float32")), np.array(validation_labels).astype("int8")
+	return x, y, val_x, val_y
 
 
 def generate_multi_test_train(data1, data2, labels, norm_func, augmentation_types):

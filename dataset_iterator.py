@@ -3,13 +3,18 @@ import numpy as np
 
 class DatasetIterator(object):
 
-	def __init__(self, data, labels, test_ids=None, test_data=None, test_labels=None):
+	def __init__(self, data, labels, validation_labels=None, validation_data=None, test_data=None, test_ids=None):
+
+		self.batch_index = 0
+
 		self.data = data
 		self.labels = labels
-		self.batch_index = 0
+
+		self.validation_data = validation_data
+		self.validation_labels = validation_labels
+
 		self.test_ids = test_ids
 		self.test_data = test_data
-		self.test_labels = test_labels
 
 	def next_batch(self, batch_size):
 		if self.batch_index*batch_size + batch_size > len(self.data):
@@ -28,10 +33,13 @@ class DatasetIterator(object):
 		return len(self.data)
 
 	def get_test(self):
-		return self.test_ids, self.test_data, self.test_labels
+		return self.test_ids, self.test_data
 
-	def get_test_as_datasetiterator(self):
-		return DatasetIterator(data=self.test_data, labels=self.test_labels)
+	def get_validation(self):
+		return self.validation_data, self.validation_labels
+
+	def get_validation_as_dataset_iterator(self):
+		return DatasetIterator(data=self.validation_data, labels=self.validation_labels)
 
 
 class MultiDatasetIterator(object):
@@ -56,5 +64,5 @@ class MultiDatasetIterator(object):
 		batched_data2, batched_labels2 = self.dataset2.next_batch(batch_size)
 		return batched_data1, batched_data2, batched_labels1
 
-	def get_test(self):
+	def get_multi_test(self):
 		return self.test_dataset1.get_all_data(), self.test_dataset2.get_all_data(), self.test_dataset1.get_all_labels()

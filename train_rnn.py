@@ -38,7 +38,7 @@ class TrainRNN(object):
 				tf.summary.scalar('accuracy', self.accuracy)
 
 	def create_embeddings(self, sess, summary_writer):
-		testing_dataset = self.dataset.get_test_as_datasetiterator()
+		testing_dataset = self.dataset.get_validation_as_dataset_iterator()
 		n_of_elements = testing_dataset.size()
 		EMB = np.zeros([n_of_elements, self.model.get_n_hidden()], dtype='float32')
 
@@ -109,12 +109,14 @@ class TrainRNN(object):
 					  "{:.6f}".format(loss) + ", Training Accuracy= " + \
 					  "{:.5f}".format(acc))
 
-				test_ids, test_data, test_label = self.dataset.get_test()
-				summary, accuracy, probabilities = sess.run([merged, self.accuracy, self.probabilities], feed_dict={self.x: test_data, self.y: test_label, self.dropout: 1})
+				validation_data, validation_label = self.dataset.get_validation()
+				summary, accuracy, probabilities = sess.run([merged, self.accuracy, self.probabilities], feed_dict={self.x: validation_data, self.y: validation_label, self.dropout: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
 				if epochs % 10 == 0:
+					test_ids, test_data = self.dataset.get_test()
+					probabilities = sess.run(self.probabilities, feed_dict={self.x: test_data, self.dropout: 1})
 					self.write_probs_to_file(epochs, test_ids, probabilities)
-				print("Test Accuracy: {:.6f}".format(accuracy))
+				print("Epoch " + str(epochs) + "Validation Accuracy: {:.6f}".format(accuracy))
 				train_writer.flush()
 				test_writer.flush()
 			step += 1
