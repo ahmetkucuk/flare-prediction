@@ -8,7 +8,7 @@ TRAIN_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/Flar
 #DATASET_DIR=/home/ahmet/Documents/Research/Time_Series/ARDataLarge
 DATASET_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/DataFinal
 
-DATASETNAME=12_6
+#DATASETNAME=12_6
 
 python ./../main.py \
   --train_dir=${TRAIN_DIR} \
