@@ -66,6 +66,8 @@ class EnsembleRNN(object):
 		sess.run(init)
 		step = 1
 		# Keep training until reach max iterations
+		output_file = open(self.model_dir + '/test/validation_accuracy.txt', "w")
+		epoch = 0
 		while step < self.training_iters:
 			batch_x1, batch_x2, batch_y = self.dataset.next_batch(self.batch_size)
 
@@ -86,9 +88,13 @@ class EnsembleRNN(object):
 				summary, accuracy = sess.run([merged, self.accuracy], feed_dict={self.x1: test_data1, self.x2: test_data2, self.y: test_label, self.dropout1: 1, self.dropout2: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
 				print("Test Accuracy: {:.6f}".format(accuracy))
+				if (step*self.batch_size) / self.dataset.size() > epoch:
+					epoch = epoch + 1
+					output_file.write(str(step) + "\t" + str(accuracy) + "\n")
 				train_writer.flush()
 				test_writer.flush()
 			step += 1
+		output_file.close()
 		train_writer.close()
 		test_writer.close()
 		print("Optimization Finished!")

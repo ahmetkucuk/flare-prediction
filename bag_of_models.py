@@ -15,6 +15,13 @@ def create_filename(exp_name, dataset_name, epoch):
 	return '/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Prediction_Probs/flare_prediction/' + exp_name + '_' + dataset_name + '/test/test_probabilities_epoch' + str(epoch) + '.txt'
 
 
+def create_merged_acc_filename(exp_name, dataset_name):
+	data_root = '/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Prediction_Probs/flare_prediction/' + exp_name + '_' + dataset_name + '/test'
+	if not os.path.exists(data_root):
+		os.makedirs(data_root)
+	return data_root + '/test_probabilities_epoch_merged.txt'
+
+
 def create_merged_probs_filename(exp_name, dataset_name, epoch):
 	data_root = '/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Prediction_Probs/flare_prediction/merged/' + exp_name + '_' + dataset_name
 	if not os.path.exists(data_root):
@@ -59,22 +66,34 @@ def write_merged_probs(merged_probs, output_file_path):
 			else:
 				output_file.write(key + "\t" + "F\n")
 
-epoch = 1000
-#12_6 = 400
-#12_12 = 400
-#12_24 = 400
-#24_6 = 400
-#24_12 = 400
-#24_24 = 400
-for dataset_name in ['12_6', '12_12', '12_24', '24_6', '24_12', '24_24']:
-	for i in range(10, epoch, 10):
-		print("Start for epoch: " + str(i))
-		probs1 = read_prob_file(create_filename('final0', dataset_name, i))
-		probs2 = read_prob_file(create_filename('final1', dataset_name, i))
-		output_file_path = create_merged_probs_filename('final0final1', dataset_name, i)
 
-		merged_probs = merge_probs(probs1, probs2)
-		# print(calculate_accuracy(probs1))
-		# print(calculate_accuracy(probs2))
-		# print(calculate_accuracy(merged_probs))
-		write_merged_probs(merged_probs, output_file_path)
+epoch = 1000
+for dataset_name in ['12_6', '12_12', '12_24', '24_6', '24_12', '24_24']:
+	output_file_path = create_merged_acc_filename('exp_f11exp_f12', dataset_name)
+	with open(output_file_path, "w") as output_file:
+
+		for i in range(10, epoch, 10):
+			print("Start for epoch: " + str(i))
+			probs1 = read_prob_file(create_filename('exp_f11', dataset_name, i))
+			probs2 = read_prob_file(create_filename('exp_f12', dataset_name, i))
+
+			merged_probs = merge_probs(probs1, probs2)
+			acc1 = calculate_accuracy(probs1)
+			acc2 = calculate_accuracy(probs2)
+			merged_acc = calculate_accuracy(merged_probs)
+			print(merged_acc)
+			output_file.write(str(i) + "\t" + str(acc1) + "\t" + str(acc2) + "\t" + str(merged_acc) + "\n")
+
+# epoch = 1000
+# for dataset_name in ['12_6', '12_12', '12_24', '24_6', '24_12', '24_24']:
+# 	for i in range(10, epoch, 10):
+# 		print("Start for epoch: " + str(i))
+# 		probs1 = read_prob_file(create_filename('exp_f11', dataset_name, i))
+# 		probs2 = read_prob_file(create_filename('exp_f12', dataset_name, i))
+# 		output_file_path = create_merged_probs_filename('exp_f11exp_f12', dataset_name, i)
+#
+# 		merged_probs = merge_probs(probs1, probs2)
+# 		#print(calculate_accuracy(probs1))
+# 		#print(calculate_accuracy(probs2))
+# 		print(calculate_accuracy(merged_probs))
+# 		write_merged_probs(merged_probs, output_file_path)

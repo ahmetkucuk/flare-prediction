@@ -59,6 +59,9 @@ class MultiDatasetIterator(object):
 			print("There is serious error in Multi dataset creation for TEST")
 			exit()
 
+	def size(self):
+		return len(self.dataset1)
+
 	def next_batch(self, batch_size):
 		batched_data1, batched_labels1 = self.dataset1.next_batch(batch_size)
 		batched_data2, batched_labels2 = self.dataset2.next_batch(batch_size)
