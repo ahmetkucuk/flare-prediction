@@ -37,6 +37,10 @@ class TrainRNN(object):
 				self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 				tf.summary.scalar('accuracy', self.accuracy)
 
+			with tf.name_scope("prediction"):
+				self.auc = tf.metrics.auc(labels=self.y, predictions=tf.nn.softmax(self.preds))
+				tf.summary.scalar('auc', self.auc)
+
 	def create_embeddings(self, sess, summary_writer):
 		testing_dataset = self.dataset.get_validation_as_dataset_iterator()
 		n_of_elements = testing_dataset.size()
@@ -111,9 +115,9 @@ class TrainRNN(object):
 					  "{:.5f}".format(acc))
 
 				validation_data, validation_label = self.dataset.get_validation()
-				summary, accuracy, probabilities = sess.run([merged, self.accuracy, self.probabilities], feed_dict={self.x: validation_data, self.y: validation_label, self.dropout: 1})
+				summary, accuracy, probabilities, auc = sess.run([merged, self.accuracy, self.probabilities, self.auc], feed_dict={self.x: validation_data, self.y: validation_label, self.dropout: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
-				output_file.write(str(epochs) + "\t" + str(accuracy) + "\n")
+				output_file.write(str(epochs) + "\t" + str(accuracy) + "\t" + str(auc) + "\n")
 				# if epochs % 10 == 0:
 				# 	test_ids, test_data = self.dataset.get_test()
 				# 	probabilities = sess.run(self.probabilities, feed_dict={self.x: test_data, self.dropout: 1})
