@@ -3,6 +3,7 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow.contrib.tensorboard.plugins import projector
 import numpy as np
+from sklearn import metrics
 
 
 class TrainRNN(object):
@@ -36,10 +37,6 @@ class TrainRNN(object):
 				correct_pred = tf.equal(tf.argmax(self.preds, 1), tf.argmax(self.y, 1))
 				self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 				tf.summary.scalar('accuracy', self.accuracy)
-
-			with tf.name_scope("prediction"):
-				self.auc = tf.metrics.auc(labels=self.y, predictions=tf.nn.softmax(self.preds))
-				tf.summary.scalar('auc', self.auc)
 
 	def create_embeddings(self, sess, summary_writer):
 		testing_dataset = self.dataset.get_validation_as_dataset_iterator()
@@ -84,6 +81,12 @@ class TrainRNN(object):
 				prob_argmax = np.argmax(prob)
 				prob_file.write(str(id) + "\t" + str(prob[0]) + "\t" + str(prob[1]) + "\t" + ("noflare" if prob_argmax == 1 else "flare") + "\n")
 
+	def calculate_auc(self, y, pred):
+		print(np.argmax(y, 1))
+		print(np.max(pred, 1))
+		fpr, tpr, thresholds = metrics.roc_curve(np.argmax(y, 1), np.max(pred, 1))
+		return metrics.auc(fpr, tpr)
+
 	def train(self):
 		init = tf.global_variables_initializer()
 		sess = tf.Session()
@@ -115,9 +118,9 @@ class TrainRNN(object):
 					  "{:.5f}".format(acc))
 
 				validation_data, validation_label = self.dataset.get_validation()
-				summary, accuracy, probabilities, auc = sess.run([merged, self.accuracy, self.probabilities, self.auc], feed_dict={self.x: validation_data, self.y: validation_label, self.dropout: 1})
+				summary, accuracy, probabilities = sess.run([merged, self.accuracy, self.probabilities], feed_dict={self.x: validation_data, self.y: validation_label, self.dropout: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
-				output_file.write(str(epochs) + "\t" + str(accuracy) + "\t" + str(auc) + "\n")
+				output_file.write(str(epochs) + "\t" + str(accuracy) + "\n")
 				# if epochs % 10 == 0:
 				# 	test_ids, test_data = self.dataset.get_test()
 				# 	probabilities = sess.run(self.probabilities, feed_dict={self.x: test_data, self.dropout: 1})
