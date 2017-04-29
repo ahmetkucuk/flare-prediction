@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
+DATASETNAME=12_6
 # Where the checkpoint and logs will be saved to.
 #TRAIN_DIR=/tmp/lenet-model
 TRAIN_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/Tensorboard/FlarePrediction/embedding4_${DATASETNAME}
 
 # Where the dataset is saved to.
 #DATASET_DIR=/home/ahmet/Documents/Research/Time_Series/ARDataLarge
-DATASET_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/DataFinal
-
-#DATASETNAME=12_6
+DATASET_DIR=/Users/ahmetkucuk/Documents/Research/Flare_Prediction/DataFinal/train
 
 python ./../main.py \
   --train_dir=${TRAIN_DIR} \
@@ -23,7 +22,7 @@ python ./../main.py \
   --dropout=0.8 \
   --batch_size=20 \
   --cell_type=GRU \
-  --augmentation_type=-1 \
+  --augmentation_type=1 \
   --dataset_name=$DATASETNAME \
   --display_step=1 \
   --feature_indexes=13 \

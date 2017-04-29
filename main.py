@@ -84,7 +84,8 @@ def main(argv=None):
 	# else:
 
 	n_steps = get_dataset_size(FLAGS.dataset_name)
-	dataset = get_final_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
+	dataset = get_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
+	#dataset = get_final_data(name=FLAGS.dataset_name, data_root=FLAGS.dataset_dir, norm_func=norm_func, augmentation_types=augmentation_types, feature_indexes=feature_indexes)
 	print("Length of Dataset: " + str(dataset.size()))
 
 	lstm = BasicRNNModel(n_input=FLAGS.n_input, n_steps=n_steps, n_hidden=FLAGS.n_hidden,

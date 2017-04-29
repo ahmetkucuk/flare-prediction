@@ -94,7 +94,6 @@ def get_data(data_root, name, norm_func, augmentation_types, feature_indexes=ran
 	data = dataset_by_identifier[name]
 	labels = dataset_by_identifier[name + "_labels"]
 	ids = dataset_by_identifier[name + "_ids"]
-	print(ids)
 
 	return generate_test_train(data, labels, ids, norm_func, augmentation_types)
 
@@ -270,7 +269,7 @@ def generate_test_train(data, labels, ids, norm_func, augmentation_types):
 
 	x, y = norm_func(np.array(training_data).astype("float32")), np.array(training_labels).astype("int8")
 	test_x, test_y = norm_func(np.array(testing_data).astype("float32")), np.array(testing_labels).astype("int8")
-	return DatasetIterator(x, y, test_ids=testing_ids, test_data=test_x, test_labels=test_y)
+	return DatasetIterator(x, y, validation_data=test_x, validation_labels=test_y)
 
 
 def generate_train_validation(data, labels, ids, norm_func, augmentation_types):

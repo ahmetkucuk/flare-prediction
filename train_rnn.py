@@ -92,6 +92,7 @@ class TrainRNN(object):
 		step = 1
 		epochs = 0
 		# Keep training until reach max iterations
+		output_file = open(self.model_dir + '/test/validation_accuracy.txt', "w")
 		while step < self.training_iters:
 			batch_x, batch_y = self.dataset.next_batch(self.batch_size)
 
@@ -112,15 +113,17 @@ class TrainRNN(object):
 				validation_data, validation_label = self.dataset.get_validation()
 				summary, accuracy, probabilities = sess.run([merged, self.accuracy, self.probabilities], feed_dict={self.x: validation_data, self.y: validation_label, self.dropout: 1})
 				test_writer.add_summary(summary=summary, global_step=step)
-				if epochs % 10 == 0:
-					test_ids, test_data = self.dataset.get_test()
-					probabilities = sess.run(self.probabilities, feed_dict={self.x: test_data, self.dropout: 1})
-					self.write_probs_to_file(epochs, test_ids, probabilities)
+				output_file.write(str(epochs) + "\t" + str(accuracy) + "\n")
+				# if epochs % 10 == 0:
+				# 	test_ids, test_data = self.dataset.get_test()
+				# 	probabilities = sess.run(self.probabilities, feed_dict={self.x: test_data, self.dropout: 1})
+				# 	self.write_probs_to_file(epochs, test_ids, probabilities)
 				print("Epoch " + str(epochs) + "Validation Accuracy: {:.6f}".format(accuracy))
 				train_writer.flush()
 				test_writer.flush()
+				output_file.flush()
 			step += 1
-
+		output_file.close()
 		train_writer.close()
 		test_writer.close()
 		self.create_embeddings(sess, train_writer)
