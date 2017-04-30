@@ -60,7 +60,7 @@ class MultiDatasetIterator(object):
 			exit()
 
 	def size(self):
-		return len(self.dataset1)
+		return self.dataset1.size()
 
 	def next_batch(self, batch_size):
 		batched_data1, batched_labels1 = self.dataset1.next_batch(batch_size)
