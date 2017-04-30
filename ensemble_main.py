@@ -79,7 +79,6 @@ def main(args=None):
     norm_func = get_norm_func(FLAGS.norm_type)
 
     augmentation_types = [int(i) for i in FLAGS.augmentation_types.split(",")]
-    n_steps = get_dataset_size(FLAGS.dataset_name)
 
     if FLAGS.is_multi_feature:
         print("Ensemble Started with Multi Feature")
@@ -91,7 +90,7 @@ def main(args=None):
     train_lstm = EnsembleRNN(dataset, model_dir=FLAGS.train_dir, learning_rate=FLAGS.learning_rate,
                           training_iters=FLAGS.training_iters, batch_size=FLAGS.batch_size,
                           display_step=FLAGS.display_step, dropout_val=FLAGS.dropout, n_hidden=FLAGS.n_hidden,
-                             n_steps=n_steps, m1_cell=FLAGS.m1_cell, m2_cell=FLAGS.m2_cell)
+                             n_steps=FLAGS.n_steps, m1_cell=FLAGS.m1_cell, m2_cell=FLAGS.m2_cell)
     train_lstm.train()
 
 
