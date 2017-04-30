@@ -82,7 +82,8 @@ def read_data(data_root, feature_indexes):
 			ts_features_in_file = impute_by_mean(ts_features_in_file)
 			dataset_by_identifier[dataset_values].append(ts_features_in_file)
 			dataset_by_identifier[dataset_labels].append(label)
-			dataset_by_identifier[dataset_id].append(filename)
+			#NOTE USE FILENAME TO RUN ON FINAL DATA
+			dataset_by_identifier[dataset_id].append(timestamp)
 
 	return dataset_by_identifier
 
@@ -160,7 +161,6 @@ def get_multi_data(data_root, norm_func, augmentation_types, feature_indexes):
 	new_labels1, new_data1 = [], []
 	new_labels2, new_data2 = [], []
 	common_records = set(ids1).intersection(set(ids2))
-
 	for id, l, d in zip(ids1, labels1, data1):
 		if id in common_records:
 			new_data1.append(d)
